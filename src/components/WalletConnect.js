@@ -18,6 +18,7 @@ const WalletConnect = () => {
       {activeConnector && network?.activeChain?.id !== +chainId && (
         <Button
           onClick={() => {
+            console.log(`ENVIROMENT: ${process.env.NODE_ENV}`);
             //Using Wagmi hooks to switch to Polygon network was not functioning properly, So we have to do it the old fashion way until i can look into it
             window.ethereum.request({
               method: 'wallet_addEthereumChain',

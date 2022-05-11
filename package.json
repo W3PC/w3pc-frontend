@@ -12,6 +12,7 @@
     "react-router-dom": "^5.3.1",
     "react-scripts": "5.0.1",
     "styled-components": "^5.3.5",
+    "tailwind-styled-components": "^2.1.7",
     "wagmi": "^0.3.5",
     "web-vitals": "^2.1.4"
   },
