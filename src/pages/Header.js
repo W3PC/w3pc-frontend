@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import tw from "tailwind-styled-components"
 import { Link } from 'react-router-dom'
 
 import WalletConnect from '../components/WalletConnect'
@@ -24,17 +24,12 @@ const Header = () => {
   )
 }
 
-const Container = styled.div`
-  display: flex;
-  width: 90%;
-  height: 10vh;
-  align-items: center;
-  flex-direction: row;
-  justify-content: space-between;
-  border: 1px solid black;
+const Container = tw.div`
+  flex
+  flex-row
 `
 
-const PageRoute = styled(Link)`
+const PageRoute = tw(Link)`
   font-size: 1.5em;
   text-decoration: none;
 `

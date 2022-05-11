@@ -6,6 +6,8 @@ import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
 
+console.log(process.env.REACT_APP_RPC_URL)
+
 const WagmiProvider = (props) => {
   //List of chains from wagmi
   const chains =
