@@ -5,6 +5,7 @@ import { useChainState } from '../hooks/useChainState'
 import gameDirectoryAbi from '../constants/abis/GameDirectory.json'
 import gameAbi from '../constants/abis/Game.json'
 import { gameDirectoryAddress, zeroAddress } from '../constants'
+import HostPanel from '../components/HostPanel'
 
 const HostGame = () => {
   const [errors, setErrors] = useState({})
@@ -108,32 +109,35 @@ const HostGame = () => {
         </div>
       )}
       {hostedGame.data !== zeroAddress && (
-        <GameInfo>
-          <GameId>
-            <div>GAME ID:</div>
-            <div style={{ fontWeight: 'bold' }}>
-              {`${hostedGame?.data?.substring(0, 14)}...`}
-            </div>
-            <div>
-              <Button
-                style={{ fontSize: '1rem' }}
-                onClick={() => handleCopyClick()}
-              >
-                {isCopied ? 'Copied!' : 'Copy to Clipboard'}
-              </Button>
-              <Button style={{ fontSize: '1rem', marginLeft: 10 }}>
-                Contract
-              </Button>
-            </div>
-          </GameId>
+        <>
+          <GameInfo>
+            <GameId>
+              <div>GAME ID:</div>
+              <div style={{ fontWeight: 'bold' }}>
+                {`${hostedGame?.data?.substring(0, 14)}...`}
+              </div>
+              <div>
+                <Button
+                  style={{ fontSize: '1rem' }}
+                  onClick={() => handleCopyClick()}
+                >
+                  {isCopied ? 'Copied!' : 'Copy to Clipboard'}
+                </Button>
+                <Button style={{ fontSize: '1rem', marginLeft: 10 }}>
+                  Contract
+                </Button>
+              </div>
+            </GameId>
 
-          <GameId style={{ marginLeft: '10%' }}>
-            <div>Total CHIPS in Game</div>
-            <div style={{ fontWeight: 'bold', alignSelf: 'center' }}>
-              {totalGameCredits?.data?.toNumber()} CHIPS
-            </div>
-          </GameId>
-        </GameInfo>
+            <GameId style={{ marginLeft: '10%' }}>
+              <div>Total CHIPS in Game</div>
+              <div style={{ fontWeight: 'bold', alignSelf: 'center' }}>
+                {totalGameCredits?.data?.toNumber()} CHIPS
+              </div>
+            </GameId>
+          </GameInfo>
+          <HostPanel gameId={hostedGame.data} />
+        </>
       )}
     </Container>
   )
