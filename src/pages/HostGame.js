@@ -23,7 +23,7 @@ const HostGame = () => {
     'hostedGames',
     {
       args: account?.data?.address,
-      enabled: account?.data?.address,
+      enabled: account?.data?.address ? true : false,
     }
   )
   const createGame = useContractWrite(
@@ -61,7 +61,8 @@ const HostGame = () => {
     },
     'totalGameCredits',
     {
-      disabled: !hostedGame && hostedGame === zeroAddress,
+      enabled:
+        hostedGame?.data && hostedGame.data !== zeroAddress ? true : false,
     }
   )
 
@@ -96,19 +97,19 @@ const HostGame = () => {
 
   return (
     <Container>
-      {hostedGame.data === zeroAddress && (
+      {hostedGame.data === zeroAddress && hostedGame.data && (
         <div>
           <div>Your Hosted Game</div>
           <h2 style={{ color: 'red' }}>No Game Detected</h2>
           <Button
             onClick={(e) => handleClick(e)}
-            disabled={createGame.isLoading}
+            disabled={createGame.isLoading()}
           >
             {loading ? 'Creating...' : 'Create Game'}
           </Button>
         </div>
       )}
-      {hostedGame.data !== zeroAddress && (
+      {hostedGame.data !== zeroAddress && hostedGame.data && (
         <>
           <GameInfo>
             <GameId>

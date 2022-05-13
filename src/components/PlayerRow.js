@@ -1,59 +1,44 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { useContractWrite, useContract, useSigner } from 'wagmi'
+import { useContractWrite, useContractRead } from 'wagmi'
 import gameAbi from '../constants/abis/Game.json'
-import { utils, BigNumber, providers } from 'ethers'
+import { utils, BigNumber } from 'ethers'
+import { addCreditsErr, deductCreditsErr } from '../constants'
 
-const PlayerRow = ({ userName, credits, id, gameAddress, refetch }) => {
+const PlayerRow = ({ userName, credits, id, gameAddress, setErrors }) => {
   const [inputValue, setInputValue] = useState('')
-  const [errors, setErrors] = useState('')
-  const signer = useSigner()
+  const [loading, setLoading] = useState(false)
 
-  const gameContract = useContract({
-    addressOrName: gameAddress,
-    contractInterface: gameAbi,
-    signerOrProvider: signer.data,
-  })
-
-  console.log(gameAddress)
-
-  const ethersDeductCredits = async (e) => {
-    e.preventDefault()
-    console.log(gameContract)
-    await gameContract
-      .deductCredits(utils.getAddress(id), BigNumber.from(+inputValue))
-      .then((data) => {
-        if (data) {
-          debugger
-          data
-            .wait()
-            .then((data) => {
-              console.log(data)
-            })
-            .catch((error) => {
-              console.log(error)
-            })
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-  }
+  const gameCredits = useContractRead(
+    {
+      addressOrName: '0xd8058efe0198ae9dD7D563e1b4938Dcbc86A1F81',
+      contractInterface: gameAbi,
+    },
+    'gameCredits',
+    {
+      args: [id],
+      enabled: id && gameAddress ? true : false,
+    }
+  )
 
   const addCreditsWrite = useContractWrite(
     {
-      addressOrName: gameAddress,
+      addressOrName: '0xd8058efe0198ae9dD7D563e1b4938Dcbc86A1F81',
       contractInterface: gameAbi,
     },
     'addCredits',
     {
       onSuccess(data) {
+        console.log('here')
         if (data) {
           data
             .wait()
             .then((data) => {
               if (data) {
-                refetch()
+                console.log(data)
+                gameCredits.refetch()
+                setLoading(false)
+                setInputValue('')
               }
             })
             .catch((error) => {
@@ -62,11 +47,22 @@ const PlayerRow = ({ userName, credits, id, gameAddress, refetch }) => {
             })
         }
       },
+      onError(error) {
+        console.log(error)
+        if (error.message === addCreditsErr) {
+          setErrors(
+            'There is not enough credits in the game contract to add that many credits.'
+          )
+        } else {
+          setErrors('There was an error adding credits please try again')
+        }
+        setLoading(false)
+      },
     }
   )
   const deductCreditsWrite = useContractWrite(
     {
-      addressOrName: gameAddress,
+      addressOrName: '0xd8058efe0198ae9dD7D563e1b4938Dcbc86A1F81',
       contractInterface: gameAbi,
     },
     'deductCredits',
@@ -77,16 +73,29 @@ const PlayerRow = ({ userName, credits, id, gameAddress, refetch }) => {
             .wait()
             .then((data) => {
               if (data) {
-                refetch()
+                console.log(data)
+                gameCredits.refetch()
+                setLoading(false)
+                setInputValue('')
               }
             })
             .catch((error) => {
               console.log(error)
+              setLoading(false)
               setErrors(
                 'There was an error subtracting credits, please try again'
               )
             })
         }
+      },
+      onError(error) {
+        console.log(error)
+        if (error.message === deductCreditsErr) {
+          setErrors('You cannot deduct more than a player has')
+        } else {
+          setErrors('There was an error deducting credits please try again')
+        }
+        setLoading(false)
       },
     }
   )
@@ -97,6 +106,8 @@ const PlayerRow = ({ userName, credits, id, gameAddress, refetch }) => {
       setErrors('Please input a valid amount')
       return
     }
+    setErrors('')
+    setLoading(true)
     addCreditsWrite.write({
       args: [utils.getAddress(id), BigNumber.from(inputValue)],
     })
@@ -107,9 +118,8 @@ const PlayerRow = ({ userName, credits, id, gameAddress, refetch }) => {
       setErrors('Please input a valid amount')
       return
     }
-
-    console.log(utils.getAddress(id), BigNumber.from(inputValue))
-
+    setErrors('')
+    setLoading(true)
     deductCreditsWrite.write({
       args: [utils.getAddress(id), BigNumber.from(inputValue)],
     })
@@ -119,7 +129,9 @@ const PlayerRow = ({ userName, credits, id, gameAddress, refetch }) => {
     <>
       <tr>
         <th>{userName}</th>
-        <td>{credits} Chips</td>
+        <td>
+          {gameCredits.isFetched ? gameCredits.data.toString() : credits} Chips
+        </td>
         <td>
           <form>
             <input
@@ -133,9 +145,10 @@ const PlayerRow = ({ userName, credits, id, gameAddress, refetch }) => {
         <td>
           <form>
             <Button
-              value='Add Credits'
+              value={loading ? 'Completing...' : 'Add Credits'}
               type='submit'
               onClick={(e) => addCredits(e)}
+              disabled={loading}
             />
           </form>
         </td>
@@ -143,15 +156,14 @@ const PlayerRow = ({ userName, credits, id, gameAddress, refetch }) => {
           <form>
             <Button
               style={{ backgroundColor: '#a65a49', borderColor: '#a65a49' }}
-              value='Deduct Credits'
+              value={loading ? 'Completing....' : 'Deduct Credits'}
               type='submit'
-              onClick={(e) => ethersDeductCredits(e)}
-              disabled={!signer.isFetched}
+              onClick={(e) => deductCredits(e)}
+              disabled={loading}
             />
           </form>
         </td>
       </tr>
-      {errors && <div style={{ color: 'red' }}>{errors}</div>}
     </>
   )
 }
