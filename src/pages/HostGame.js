@@ -6,11 +6,11 @@ import gameDirectoryAbi from '../constants/abis/GameDirectory.json'
 import gameAbi from '../constants/abis/Game.json'
 import { gameDirectoryAddress, zeroAddress } from '../constants'
 import HostPanel from '../components/HostPanel'
+import CopyButton from '../components/CopyButton'
 
 const HostGame = () => {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
 
   const { account } = useChainState()
   const provider = useProvider()
@@ -66,29 +66,6 @@ const HostGame = () => {
     }
   )
 
-  async function copyTextToClipboard(text) {
-    if ('clipboard' in navigator) {
-      return await navigator.clipboard.writeText(text)
-    } else {
-      return document.execCommand('copy', true, text)
-    }
-  }
-
-  const handleCopyClick = () => {
-    // Asynchronously call copyTextToClipboard
-    copyTextToClipboard(hostedGame.data)
-      .then(() => {
-        // If successful, update the isCopied state value
-        setIsCopied(true)
-        setTimeout(() => {
-          setIsCopied(false)
-        }, 1500)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }
-
   const handleClick = (e) => {
     e.preventDefault()
     setLoading(true)
@@ -118,12 +95,7 @@ const HostGame = () => {
                 {`${hostedGame?.data?.substring(0, 14)}...`}
               </div>
               <div>
-                <Button
-                  style={{ fontSize: '1rem' }}
-                  onClick={() => handleCopyClick()}
-                >
-                  {isCopied ? 'Copied!' : 'Copy to Clipboard'}
-                </Button>
+                <CopyButton text={hostedGame.data} />
                 <Button style={{ fontSize: '1rem', marginLeft: 10 }}>
                   Contract
                 </Button>

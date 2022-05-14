@@ -24,7 +24,7 @@ const HostPanel = ({ gameId }) => {
         }
       }
     }`
-  const [result, reexecuteQuery] = useQuery({
+  const [result] = useQuery({
     query: playerQuery,
   })
 

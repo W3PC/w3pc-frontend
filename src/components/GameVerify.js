@@ -6,6 +6,10 @@ import styled from 'styled-components'
 import { gameDirectoryAddress, zeroAddress } from '../constants'
 
 const GameVerify = ({ gameId }) => {
+  // This componenet is what i initially used to verify that a contract is one of our contracts
+  // To prevent from someone from tricking us into interacting with a naughty contract
+  // This method no longer works since game contracts no longer have an owner function but im keeping in here for reference
+
   const [loading, setLoading] = useState(true)
   const [validContract, setValidContract] = useState(true)
 
@@ -50,7 +54,7 @@ const GameVerify = ({ gameId }) => {
       setLoading(false)
       setValidContract(true)
     }
-  }, [hostedGame])
+  }, [hostedGame, gameId])
   return (
     <Container>
       {loading && <div>Loading...</div>}

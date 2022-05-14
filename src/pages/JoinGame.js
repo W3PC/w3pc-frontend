@@ -1,24 +1,35 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import GameVerify from '../components/GameVerify'
+import GameView from '../components/GameView'
 
 const JoinGame = () => {
   const [gameId, setGameId] = useState('')
   const [searchedGame, setSearchedGame] = useState('')
+  const [gameLoaded, setGameLoaded] = useState(false)
 
   const handleClick = (e) => {
     e.preventDefault()
     setSearchedGame(gameId)
   }
 
+  const setGameLoadedFunc = (set) => {
+    setGameLoaded(set)
+  }
+
   return (
     <Container>
-      <div>Enter a Game ID Below</div>
-      <div>
-        <input value={gameId} onChange={(e) => setGameId(e.target.value)} />
-      </div>
-      <Button onClick={handleClick}>View Game</Button>
-      {searchedGame && <GameVerify gameId={searchedGame} />}
+      {!gameLoaded && (
+        <>
+          <div style={{ paddingTop: '5%' }}>Enter a Game ID Below</div>
+          <div>
+            <input value={gameId} onChange={(e) => setGameId(e.target.value)} />
+          </div>
+          <Button onClick={handleClick}>View Game</Button>
+        </>
+      )}
+      {searchedGame && (
+        <GameView gameId={searchedGame} setGameLoaded={setGameLoadedFunc} />
+      )}
     </Container>
   )
 }
@@ -29,7 +40,6 @@ const Container = styled.div`
   width: auto;
   align-items: center;
   font-size: 1.5rem;
-  padding-top: 5%;
 `
 const Button = styled.button`
   color: white;

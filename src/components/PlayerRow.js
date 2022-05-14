@@ -11,7 +11,7 @@ const PlayerRow = ({ userName, credits, id, gameAddress, setErrors }) => {
 
   const gameCredits = useContractRead(
     {
-      addressOrName: '0xd8058efe0198ae9dD7D563e1b4938Dcbc86A1F81',
+      addressOrName: gameAddress,
       contractInterface: gameAbi,
     },
     'gameCredits',
@@ -23,7 +23,7 @@ const PlayerRow = ({ userName, credits, id, gameAddress, setErrors }) => {
 
   const addCreditsWrite = useContractWrite(
     {
-      addressOrName: '0xd8058efe0198ae9dD7D563e1b4938Dcbc86A1F81',
+      addressOrName: gameAddress,
       contractInterface: gameAbi,
     },
     'addCredits',
@@ -62,7 +62,7 @@ const PlayerRow = ({ userName, credits, id, gameAddress, setErrors }) => {
   )
   const deductCreditsWrite = useContractWrite(
     {
-      addressOrName: '0xd8058efe0198ae9dD7D563e1b4938Dcbc86A1F81',
+      addressOrName: gameAddress,
       contractInterface: gameAbi,
     },
     'deductCredits',
