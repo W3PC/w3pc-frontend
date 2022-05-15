@@ -6,12 +6,14 @@ import cashierAbi from '../constants/abis/Cashier.json'
 import { cashierAddress } from '../constants'
 import gameAbi from '../constants/abis/Game.json'
 import { BigNumber } from 'ethers'
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 
 const AdjustCredits = ({ gameId, updateValues }) => {
   const [inputValue, setInputValue] = useState('')
   const [depositStatus, setDepositStatus] = useState('unapproved')
   const [withdrawStatus, setWithdrawStatus] = useState('unapproved')
   const [errors, setErrors] = useState('')
+  const addRecentTransaction = useAddRecentTransaction()
 
   const onInputChange = (e) => {
     //Make sure they didnt input a decimal
@@ -44,6 +46,10 @@ const AdjustCredits = ({ gameId, updateValues }) => {
       },
       onSuccess(data) {
         if (data) {
+          addRecentTransaction({
+            hash: data.hash,
+            description: `Approved ${inputValue} CHIPS to be sent to Game: ${gameId}`,
+          })
           data
             .wait()
             .then((data) => {
@@ -71,6 +77,10 @@ const AdjustCredits = ({ gameId, updateValues }) => {
     {
       onSettled(data) {
         if (data) {
+          addRecentTransaction({
+            hash: data.hash,
+            description: `Added ${inputValue} CHIPS to Game: ${gameId}`,
+          })
           data
             .wait()
             .then((data) => {
@@ -112,6 +122,10 @@ const AdjustCredits = ({ gameId, updateValues }) => {
     {
       onSettled(data) {
         if (data) {
+          addRecentTransaction({
+            hash: data.hash,
+            description: `Withdrew ${inputValue} CHIPS from Game: ${gameId} `,
+          })
           data
             .wait()
             .then((data) => {
@@ -199,7 +213,8 @@ const AdjustCredits = ({ gameId, updateValues }) => {
         }}
       >
         <Button
-          primary
+          green
+          style={{ marginRight: '1rem' }}
           onClick={(e) => addChips(e)}
           disabled={depositStatus === 'approving' || depositStatus === 'buying'}
         >
@@ -214,15 +229,14 @@ const AdjustCredits = ({ gameId, updateValues }) => {
             : 'Deposit'}
         </Button>
         <Button
-          primary
-          style={{ marginRight: 0 }}
+          green
           onClick={(e) => withdrawChips(e)}
           disabled={withdrawStatus === 'withdrawing'}
         >
           {withdrawChips === 'withdrawing' ? 'Completing Txn...' : 'Withdraw'}
         </Button>
       </div>
-      <div style={{ maxWidth: 'initial' }}>
+      <div>
         {(withdrawStatus === 'success' || depositStatus === 'success') && (
           <div style={{ color: 'green' }}>Your transaction was successful!</div>
         )}
@@ -235,8 +249,18 @@ const AdjustCredits = ({ gameId, updateValues }) => {
 }
 
 const Input = styled.input`
-  font-size: 1.5rem;
+  font-size: 1rem;
   margin-top: 1rem;
+  max-width: 150px;
+  @media (min-width: 576px) {
+    max-width: 275px;
+  }
+  @media (min-width: 768px) {
+    max-width: 375px;
+  }
+  @media (min-width: 992px) {
+    font-size: 1.5rem;
+  }
 `
 
 export default AdjustCredits

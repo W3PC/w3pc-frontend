@@ -4,14 +4,17 @@ import accountAbi from '../constants/abis/Account.json'
 import { useContractWrite } from 'wagmi'
 import { useHistory } from 'react-router-dom'
 import { utils } from 'ethers'
+import { accountAddress } from '../constants'
+import { useChainState } from '../hooks/useChainState'
 
 const CreateAccount = () => {
   const [input, setInput] = useState('')
   const [error, setError] = useState(null)
+  const { refetch } = useChainState()
   const history = useHistory()
   const register = useContractWrite(
     {
-      addressOrName: '0x8CEe8e37E03B0384daF5836fbD22b3678b0E0a3c',
+      addressOrName: accountAddress,
       contractInterface: accountAbi,
     },
     'register',
@@ -19,6 +22,7 @@ const CreateAccount = () => {
       onSettled(data) {
         if (data) {
           data.wait().then((data) => {
+            refetch()
             history.push('/')
           })
         }

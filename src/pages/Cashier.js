@@ -3,23 +3,41 @@ import styled from 'styled-components'
 import BuyForm from '../components/BuyForm'
 import SellForm from '../components/SellForm'
 import { useChainState } from '../hooks/useChainState'
+import { useHistory } from 'react-router-dom'
+import { zeroAddress, zeroUserAddress } from '../constants'
 
 const Cashier = () => {
   const chainState = useChainState()
+  const history = useHistory()
+  useEffect(() => {
+    if (
+      chainState.account?.data?.address &&
+      chainState.account.data.address !== zeroAddress &&
+      (!chainState.userName?.data ||
+        chainState.userName.data === zeroUserAddress) &&
+      chainState.userName?.isFetched
+    ) {
+      history.push('/createAccount')
+    }
+  }, [chainState.userName, chainState.account])
   return (
     <Container>
       <DataContainer>
         <Data>
-          <h2>TotalChips in Circulation</h2>
-          <h1>{chainState?.totalChips?.data?.toNumber()} Chips</h1>
+          <div>Total Chips in Circulation</div>
+          <div style={{ fontWeight: 'bold' }}>
+            {chainState?.totalChips?.data?.toNumber()} Chips
+          </div>
         </Data>
 
         <Data>
-          <h2>Your CHIPS in Wallet</h2>
+          <div>Your CHIPS in Wallet</div>
           {chainState.account.data ? (
-            <h1>{chainState?.userChips?.data?.toNumber()} CHIPS</h1>
+            <div style={{ fontWeight: 'bold' }}>
+              {chainState?.userChips?.data?.toNumber()} CHIPS
+            </div>
           ) : (
-            <h1>????</h1>
+            <div style={{ fontWeight: 'bold' }}>????</div>
           )}
         </Data>
         <Data>
@@ -31,15 +49,19 @@ const Cashier = () => {
       </DataContainer>
       <DataContainer>
         <Data>
-          <h2>USDC in the Cashier</h2>
-          <h1>{chainState?.cashierUsdc?.data?.div(1000000).toNumber()} USDC</h1>
+          <div>USDC in the Cashier</div>
+          <div style={{ fontWeight: 'bold' }}>
+            {chainState?.cashierUsdc?.data?.div(1000000).toNumber()} USDC
+          </div>
         </Data>
         <Data>
-          <h2>USDC in Wallet</h2>
+          <div>USDC in Wallet</div>
           {chainState.account.data ? (
-            <h1>{chainState?.userUsdc?.data?.div(1000000).toNumber()} USDC</h1>
+            <div style={{ fontWeight: 'bold' }}>
+              {chainState?.userUsdc?.data?.div(1000000).toNumber()} USDC
+            </div>
           ) : (
-            <h1>????</h1>
+            <div style={{ fontWeight: 'bold' }}>????</div>
           )}
         </Data>
         <Data>
@@ -58,17 +80,42 @@ const Container = styled.div`
   flex-direction: row;
   width: 100%;
   justify-content: center;
+  font-size: 1rem;
+  font-weight: 500;
+  @media (min-width: 576px) {
+    font-size: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    font-size: 2rem;
+  }
+  @media (min-width: 992px) {
+    font-size: 2.5rem;
+  }
+  @media (min-width: 1200px) {
+    font-size: 2.5rem;
+  }
 `
 const DataContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
-  margin: 5rem;
+  margin: 1rem;
+  @media (min-width: 576px) {
+    margin: 2rem;
+  }
+  @media (min-width: 768px) {
+    margin: 4rem;
+  }
+  @media (min-width: 992px) {
+    margin: 5rem;
+  }
 `
 const Data = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
+  padding-top: 5rem;
+  text-align: center;
 `
 
 export default Cashier

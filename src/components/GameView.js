@@ -7,10 +7,10 @@ import { utils } from 'ethers'
 import gameAbi from '../constants/abis/Game.json'
 import CopyButton from './CopyButton'
 import AdjustCredits from './AdjustCredits'
+import VerifyButton from './VerifyButton'
 
 const GameView = ({ gameId, setGameLoaded }) => {
   const { account } = useChainState()
-
   const gameQuery = `
   query{
     game(id: "${gameId.toLowerCase()}") {
@@ -65,10 +65,12 @@ const GameView = ({ gameId, setGameLoaded }) => {
   if (result.fetching) return <div>Loading...</div>
   if (result.error)
     return <div>There was an error fetching game contract...{result.error}</div>
+  if (!result.fetching && !result.data)
+    return <div>That is not a valid game contract</div>
 
   return (
     <Container>
-      <GameInfo>
+      <GameInfo style={{ alignItems: 'center' }}>
         <GameData>
           <div>GAME ID:</div>
           <div style={{ fontWeight: 'bold' }}>{`${gameId.substring(
@@ -101,8 +103,9 @@ const GameView = ({ gameId, setGameLoaded }) => {
         <GameData>
           <div>Game Host:</div>
           <div style={{ fontWeight: 'bold' }}>
-            {utils.parseBytes32String(result.data.game.host.name)}
+            {utils.parseBytes32String(result?.data?.game?.host?.name)}
           </div>
+          <VerifyButton />
         </GameData>
         <GameData>
           <div>Current Players:</div>
@@ -132,14 +135,23 @@ const Container = styled.div`
 const GameInfo = styled.div`
   display: flex;
   flex-direction: column;
-  font-size: 1.5rem;
-  width: 25%;
+  font-size: 1rem;
+  width: 50%;
+  @media (min-width: 576px) {
+  }
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+  }
+  @media (min-width: 992px) {
+    width: 25%;
+    font-size: 1.5rem;
+  }
 `
 const GameData = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 2.5rem;
+  padding-top: 2.5rem;
 `
 
 export default GameView

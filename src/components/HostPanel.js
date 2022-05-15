@@ -56,9 +56,20 @@ const HostPanel = ({ gameId }) => {
 }
 
 const PlayerTable = styled.table`
-  font-size: 2rem;
-  width: 70%;
+  font-size: 1rem;
+  width: 100%;
   padding-top: 5rem;
+  @media (min-width: 576px) {
+    margin: font-size: 1.3rem;
+  }
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+    width: 80%;
+  }
+  @media (min-width: 992px) {
+    font-size: 2rem;
+    width: 70%;
+  }
 `
 
 export default HostPanel

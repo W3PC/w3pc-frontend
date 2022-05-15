@@ -1,7 +1,8 @@
 import React, { useContext, createContext } from 'react'
 import { useAccount, erc20ABI, useContractRead } from 'wagmi'
 import cashierAbi from '../constants/abis/Cashier.json'
-import { usdcAddress, cashierAddress } from '../constants'
+import accountAbi from '../constants/abis/Account.json'
+import { usdcAddress, cashierAddress, accountAddress } from '../constants'
 
 //Cant think of a better name for this hook
 //This hook is for contract reads that we want to keep track of when they change, without following every txn
@@ -13,6 +14,17 @@ export const ChainContext = createContext()
 export const ChainContextProvider = (props) => {
   const account = useAccount()
 
+  const userName = useContractRead(
+    {
+      addressOrName: accountAddress,
+      contractInterface: accountAbi,
+    },
+    'name',
+    {
+      args: [account?.data?.address],
+      enabled: account?.data?.address ? true : false,
+    }
+  )
   const cashierUsdc = useContractRead(
     {
       addressOrName: usdcAddress,
@@ -74,6 +86,7 @@ export const ChainContextProvider = (props) => {
     cashierUsdc.refetch()
     totalChips.refetch()
     userChips.refetch()
+    userName.refetch()
   }
 
   return (
@@ -84,6 +97,7 @@ export const ChainContextProvider = (props) => {
         totalChips,
         cashierUsdc,
         account,
+        userName,
         refetchData,
       }}
       {...props}

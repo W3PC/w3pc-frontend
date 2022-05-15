@@ -35,11 +35,16 @@ const CopyButton = ({ text }) => {
 
 const Button = styled.button`
   color: white;
-  background: #4786ff;
-  border: 1px solid #4786ff;
+  background: #101826;
+  border: 1px solid #101826;
   border-radius: 5px;
   font-size: 1rem;
   margin-top: 0.5em;
+
+  &:hover {
+    border-color: #64748b;
+    background: #64748b;
+  }
 `
 
 export default CopyButton

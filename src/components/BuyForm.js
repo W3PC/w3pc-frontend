@@ -4,12 +4,18 @@ import { erc20ABI, useContractWrite, useProvider } from 'wagmi'
 import { BigNumber } from 'ethers'
 import cashierAbi from '../constants/abis/Cashier.json'
 import { cashierAddress, usdcAddress } from '../constants'
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
+import Button from './Button'
 
 const BuyForm = ({ userUsdc, update }) => {
   const [value, setValue] = useState('')
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('unapproved')
+  const addRecentTransaction = useAddRecentTransaction()
 
+  const number = BigNumber.from(5)
+
+  console.log(number)
   const provider = useProvider()
 
   const onInputChange = (e) => {
@@ -48,6 +54,10 @@ const BuyForm = ({ userUsdc, update }) => {
       },
       onSuccess(data) {
         if (data) {
+          addRecentTransaction({
+            hash: data.hash,
+            description: `Approved ${value} USDC to be spent on CHIPS`,
+          })
           data
             .wait()
             .then((data) => {
@@ -98,6 +108,10 @@ const BuyForm = ({ userUsdc, update }) => {
     {
       onSettled(data) {
         if (data) {
+          addRecentTransaction({
+            hash: data.hash,
+            description: `Bought ${value} CHIPS`,
+          })
           data
             .wait()
             .then((data) => {
@@ -135,7 +149,7 @@ const BuyForm = ({ userUsdc, update }) => {
 
   return (
     <>
-      <h2>Buy CHIPS with USDC</h2>
+      <div>Buy CHIPS with USDC</div>
       <Input
         type='number'
         onChange={(e) => onInputChange(e)}
@@ -151,6 +165,8 @@ const BuyForm = ({ userUsdc, update }) => {
         <div style={{ color: 'red' }}>{errors.buyTokens}</div>
       )}
       <Button
+        style={{ marginTop: '5%' }}
+        green
         onClick={buyChips}
         disabled={status === 'approving' || status === 'buying'}
       >
@@ -170,16 +186,22 @@ const BuyForm = ({ userUsdc, update }) => {
 }
 
 const Input = styled.input`
-  font-size: 1.2rem;
-  line-height: 2em;
+  font-size: 1rem;
+  line-height: 1rem;
+  max-width: 120px;
+  margin-top: 1rem;
+  @media (min-width: 576px) {
+    max-width: 200px;
+  }
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+    line-height: 1.5rem;
+    max-width: 300px;
+  }
+  @media (min-width: 992px) {
+    font-size: 2rem;
+    line-height: 2rem;
+    max-width: 475px;
+  }
 `
-const Button = styled.button`
-  color: white;
-  background: #4786ff;
-  border: 1px solid #4786ff;
-  border-radius: 5px;
-  font-size: 2em;
-  margin-top: 0.5em;
-`
-
 export default BuyForm

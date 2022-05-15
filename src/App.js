@@ -1,3 +1,4 @@
+import '@rainbow-me/rainbowkit/styles.css'
 import WagmiProvider from './WagmiProvider'
 import { ChainContextProvider } from './hooks/useChainState'
 import Layout from './Layout'
