@@ -52,10 +52,10 @@ const GameView = ({ gameId, setGameLoaded }) => {
   )
 
   useEffect(() => {
-    if (result.data) {
+    if (result?.data?.game) {
       setGameLoaded(true)
     }
-  }, [result.data, setGameLoaded])
+  }, [result?.data?.game, setGameLoaded])
 
   const updateValues = () => {
     gameCredits.refetch()
@@ -65,8 +65,8 @@ const GameView = ({ gameId, setGameLoaded }) => {
   if (result.fetching) return <div>Loading...</div>
   if (result.error)
     return <div>There was an error fetching game contract...{result.error}</div>
-  if (!result.fetching && !result.data)
-    return <div>That is not a valid game contract</div>
+  if (!result.fetching && !result.data.game)
+    return <div style={{ color: 'red' }}>That is not a valid game contract</div>
 
   return (
     <Container>
