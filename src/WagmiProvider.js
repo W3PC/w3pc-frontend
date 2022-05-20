@@ -1,5 +1,5 @@
 import React from 'react'
-import { createClient, Provider, chain } from 'wagmi'
+import { createClient, Provider } from 'wagmi'
 import {
   apiProvider,
   configureChains,
@@ -8,13 +8,30 @@ import {
 } from '@rainbow-me/rainbowkit'
 
 const WagmiProvider = (props) => {
+  const avalancheChain = {
+    blockExplorers: {
+      default: { name: 'SnowTrace', url: 'https://snowtrace.io/' },
+      default: { name: 'SnowTrace', url: 'https://snowtrace.io/' },
+    },
+    id: 43114,
+    name: 'Avalanche',
+    nativeCurrency: {
+      decimals: 18,
+      name: 'Avalanche',
+      symbol: 'Avax',
+    },
+    rpcUrls: {
+      default: 'https://api.avax.network/ext/bc/C/rpc',
+    },
+    testnet: false,
+  }
   const defaultChain =
-    process.env.NODE_ENV === 'development' ? chain.hardhat : chain.polygon
+    process.env.NODE_ENV === 'development' ? avalancheChain : avalancheChain
 
   const { chains, provider } = configureChains(
     [defaultChain],
     [
-      apiProvider.alchemy(process.env.REACT_APP_ALCHEMY_KEY),
+      apiProvider.jsonRpc((chain) => ({ rpcUrl: chain.rpcUrls.default })),
       apiProvider.fallback(),
     ]
   )

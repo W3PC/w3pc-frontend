@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useContractWrite } from 'wagmi'
-import Button from './Button'
 import cashierAbi from '../constants/abis/Cashier.json'
 import { cashierAddress } from '../constants'
 import gameAbi from '../constants/abis/Game.json'
 import { BigNumber } from 'ethers'
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
+import { Button, Group, NumberInput, Title } from '@mantine/core'
 
 const AdjustCredits = ({ gameId, updateValues }) => {
   const [inputValue, setInputValue] = useState('')
@@ -14,20 +14,6 @@ const AdjustCredits = ({ gameId, updateValues }) => {
   const [withdrawStatus, setWithdrawStatus] = useState('unapproved')
   const [errors, setErrors] = useState('')
   const addRecentTransaction = useAddRecentTransaction()
-
-  const onInputChange = (e) => {
-    //Make sure they didnt input a decimal
-    const rounded = Math.round(e.target.value)
-    if (rounded < 0) {
-      setInputValue('')
-    } else {
-      if (rounded === 0) {
-        setInputValue('')
-      } else {
-        setInputValue(rounded)
-      }
-    }
-  }
 
   const approveChipsWrite = useContractWrite(
     {
@@ -68,12 +54,12 @@ const AdjustCredits = ({ gameId, updateValues }) => {
     }
   )
 
-  const addChipsWrite = useContractWrite(
+  const postChipsWrite = useContractWrite(
     {
       addressOrName: gameId,
       contractInterface: gameAbi,
     },
-    'addChips',
+    'postChips',
     {
       onSettled(data) {
         if (data) {
@@ -113,12 +99,12 @@ const AdjustCredits = ({ gameId, updateValues }) => {
     }
   )
 
-  const returnChipsWrite = useContractWrite(
+  const withdrawChipsWrite = useContractWrite(
     {
       addressOrName: gameId,
       contractInterface: gameAbi,
     },
-    'returnChips',
+    'withdrawChips',
     {
       onSettled(data) {
         if (data) {
@@ -158,7 +144,7 @@ const AdjustCredits = ({ gameId, updateValues }) => {
     }
   )
 
-  const addChips = (e) => {
+  const postChips = (e) => {
     e.preventDefault()
     if (!inputValue || inputValue < 0 || window.isNaN(inputValue)) {
       setErrors('Please input a valid amount')
@@ -173,7 +159,7 @@ const AdjustCredits = ({ gameId, updateValues }) => {
       approveChipsWrite.write({ args: [gameId, BigNumber.from(inputValue)] })
     } else if (depositStatus === 'approved') {
       setDepositStatus('buying')
-      addChipsWrite.write({ args: [BigNumber.from(inputValue)] })
+      postChipsWrite.write({ args: [BigNumber.from(inputValue)] })
     }
   }
   const withdrawChips = (e) => {
@@ -187,36 +173,31 @@ const AdjustCredits = ({ gameId, updateValues }) => {
     }
 
     setWithdrawStatus('withdrawing')
-    returnChipsWrite.write({ args: [BigNumber.from(inputValue)] })
+    withdrawChipsWrite.write({ args: [BigNumber.from(inputValue)] })
   }
 
   console.log(depositStatus)
 
   return (
     <>
-      <div>Adjust Credits</div>
-      <div>
-        <Input
-          value={inputValue}
-          type='number'
-          onChange={(e) => onInputChange(e)}
-          disabled={
-            (depositStatus !== 'unapproved' && depositStatus !== 'success') ||
-            (withdrawStatus !== 'unapproved' && withdrawStatus !== 'success')
-          }
-        />
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          marginTop: '5%',
-        }}
-      >
+      <Title order={3}>Adjust Credits</Title>
+
+      <NumberInput
+        value={inputValue}
+        onChange={(v) => setInputValue(v)}
+        disabled={
+          (depositStatus !== 'unapproved' && depositStatus !== 'success') ||
+          (withdrawStatus !== 'unapproved' && withdrawStatus !== 'success')
+        }
+        hideControls
+        precision={0}
+        error={errors}
+      />
+      <Group spacing='lg'>
         <Button
-          green
-          style={{ marginRight: '1rem' }}
-          onClick={(e) => addChips(e)}
-          disabled={depositStatus === 'approving' || depositStatus === 'buying'}
+          color={'teal'}
+          onClick={(e) => postChips(e)}
+          disabled={depositStatus === 'teal' || depositStatus === 'buying'}
         >
           {inputValue && depositStatus === 'unapproved'
             ? 'Approve'
@@ -229,19 +210,16 @@ const AdjustCredits = ({ gameId, updateValues }) => {
             : 'Deposit'}
         </Button>
         <Button
-          green
+          color='violet'
           onClick={(e) => withdrawChips(e)}
           disabled={withdrawStatus === 'withdrawing'}
         >
           {withdrawChips === 'withdrawing' ? 'Completing Txn...' : 'Withdraw'}
         </Button>
-      </div>
+      </Group>
       <div>
         {(withdrawStatus === 'success' || depositStatus === 'success') && (
           <div style={{ color: 'green' }}>Your transaction was successful!</div>
-        )}
-        {errors && (
-          <div style={{ color: 'red', fontSize: '1rem' }}>{errors}</div>
         )}
       </div>
     </>

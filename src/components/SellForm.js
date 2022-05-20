@@ -4,8 +4,8 @@ import { useContractWrite, useProvider } from 'wagmi'
 import { BigNumber } from 'ethers'
 import cashierAbi from '../constants/abis/Cashier.json'
 import { cashierAddress } from '../constants'
-import Button from './Button'
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
+import { Title, NumberInput, Button } from '@mantine/core'
 
 const SellForm = ({ userChips, update }) => {
   const [value, setValue] = useState('')
@@ -14,23 +14,6 @@ const SellForm = ({ userChips, update }) => {
   const addRecentTransaction = useAddRecentTransaction()
 
   const provider = useProvider()
-
-  const onInputChange = (e) => {
-    //Make sure they didnt input a decimal
-    const rounded = Math.round(e.target.value)
-    console.log(rounded)
-    if (rounded < 0) {
-      setValue('')
-    } else if (rounded > userChips.data.toNumber()) {
-      setValue(userChips.data.toNumber())
-    } else {
-      if (rounded === 0) {
-        setValue('')
-      } else {
-        setValue(rounded)
-      }
-    }
-  }
 
   const sellChips = () => {
     if (value === '' || value === 0) {
@@ -98,22 +81,20 @@ const SellForm = ({ userChips, update }) => {
 
   return (
     <>
-      <div>Sell CHIPS with USDC</div>
-      <Input
-        type='number'
-        onChange={(e) => onInputChange(e)}
+      <Title order={2} align='center'>
+        Sell CHIPS with USDC
+      </Title>
+      <NumberInput
+        onChange={(v) => setValue(v)}
         value={value}
+        min={0}
+        max={userChips?.data?.toNumber()}
         disabled={status !== 'unapproved' && status !== 'success'}
+        precision={0}
+        hideControls
+        error={errors?.sellTokens}
       />
-      {errors.sellTokens && (
-        <div style={{ color: 'red' }}>{errors.sellTokens}</div>
-      )}
-      <Button
-        style={{ marginTop: '5%' }}
-        green
-        onClick={sellChips}
-        disabled={status === 'buying'}
-      >
+      <Button onClick={sellChips} disabled={status === 'buying'}>
         {status === 'buying' ? 'Confirming Txn...' : 'Sell Chips'}
       </Button>
       {status === 'success' && (
@@ -123,22 +104,4 @@ const SellForm = ({ userChips, update }) => {
   )
 }
 
-const Input = styled.input`
-  font-size: 1rem;
-  line-height: 1rem;
-  max-width: 120px;
-  @media (min-width: 576px) {
-    max-width: 200px;
-  }
-  @media (min-width: 768px) {
-    font-size: 1.5rem;
-    line-height: 1.5rem;
-    max-width: 300px;
-  }
-  @media (min-width: 992px) {
-    font-size: 2rem;
-    line-height: 2rem;
-    max-width: 475px;
-  }
-`
 export default SellForm

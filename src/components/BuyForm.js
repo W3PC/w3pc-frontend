@@ -1,39 +1,28 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { erc20ABI, useContractWrite, useProvider } from 'wagmi'
-import { BigNumber } from 'ethers'
+import { BigNumber, constants } from 'ethers'
 import cashierAbi from '../constants/abis/Cashier.json'
 import { cashierAddress, usdcAddress } from '../constants'
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
-import Button from './Button'
+import { Title, NumberInput, Button, Group, Checkbox } from '@mantine/core'
 
-const BuyForm = ({ userUsdc, update }) => {
-  const [value, setValue] = useState('')
+const BuyForm = ({ userUsdc, update, allowance }) => {
+  const [value, setValue] = useState(0)
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('unapproved')
+  const [unlimitedApproval, setUnlimitedApproval] = useState(false)
   const addRecentTransaction = useAddRecentTransaction()
 
-  const number = BigNumber.from(5)
-
-  console.log(number)
   const provider = useProvider()
 
-  const onInputChange = (e) => {
-    //Make sure they didnt input a decimal
-    const rounded = Math.round(e.target.value)
-
-    if (rounded < 0) {
-      setValue('')
-    } else if (rounded > userUsdc.data.div(1000000).toNumber()) {
-      setValue(userUsdc.data.div(1000000).toNumber())
-    } else {
-      if (rounded === 0) {
-        setValue('')
-      } else {
-        setValue(rounded)
+  useEffect(() => {
+    if (allowance?.data && status === 'unapproved') {
+      if (value > 0 && allowance.data.gt(value)) {
+        setStatus('approved')
       }
     }
-  }
+  }, [allowance?.data, value])
 
   const approveUsdc = useContractWrite(
     {
@@ -92,6 +81,11 @@ const BuyForm = ({ userUsdc, update }) => {
       })
     } else {
       setStatus('approving')
+      if (unlimitedApproval) {
+        approveUsdc.write({
+          args: [cashierAddress, constants.MaxUint256],
+        })
+      }
       approveUsdc.write({
         args: [cashierAddress, BigNumber.from(value).mul(10 ** 6)],
       })
@@ -149,35 +143,42 @@ const BuyForm = ({ userUsdc, update }) => {
 
   return (
     <>
-      <div>Buy CHIPS with USDC</div>
-      <Input
-        type='number'
-        onChange={(e) => onInputChange(e)}
+      <Title order={2} align='center'>
+        Buy CHIPS with USDC
+      </Title>
+      <NumberInput
+        onChange={(v) => setValue(v)}
         value={value}
-        disabled={status !== 'unapproved' && status !== 'success'}
+        min={0}
+        max={userUsdc?.data?.div(1000000).toNumber()}
+        disabled={status === 'buying' && status === 'approving'}
+        precision={0}
+        hideControls
+        error={errors?.buyTokens}
       />
-      {status === 'approved' && (
-        <div style={{ color: 'green' }}>
-          Txn approved click again to complete
-        </div>
-      )}
-      {errors.buyTokens && (
-        <div style={{ color: 'red' }}>{errors.buyTokens}</div>
-      )}
-      <Button
-        style={{ marginTop: '5%' }}
-        green
-        onClick={buyChips}
-        disabled={status === 'approving' || status === 'buying'}
-      >
-        {!value || status === 'approved' || status === 'success'
-          ? 'Buy CHIPS'
-          : status === 'unapproved' && value
-          ? 'Approve'
-          : status === 'approving'
-          ? 'Approving'
-          : 'Confirming Txn...'}
-      </Button>
+      <Group>
+        <Button
+          onClick={buyChips}
+          disabled={status === 'approving' || status === 'buying'}
+        >
+          {!value || status === 'approved' || status === 'success'
+            ? 'Buy CHIPS'
+            : status === 'unapproved' && value
+            ? 'Approve'
+            : status === 'approving'
+            ? 'Approving'
+            : 'Confirming Txn...'}
+        </Button>
+        {status === 'unapproved' && value > 0 && (
+          <Checkbox
+            label='Unlimited Approval'
+            checked={unlimitedApproval}
+            onChange={(event) =>
+              setUnlimitedApproval(event.currentTarget.checked)
+            }
+          />
+        )}
+      </Group>
       {status === 'success' && (
         <div style={{ color: 'green' }}>Transaction was a success!</div>
       )}
@@ -185,23 +186,4 @@ const BuyForm = ({ userUsdc, update }) => {
   )
 }
 
-const Input = styled.input`
-  font-size: 1rem;
-  line-height: 1rem;
-  max-width: 120px;
-  margin-top: 1rem;
-  @media (min-width: 576px) {
-    max-width: 200px;
-  }
-  @media (min-width: 768px) {
-    font-size: 1.5rem;
-    line-height: 1.5rem;
-    max-width: 300px;
-  }
-  @media (min-width: 992px) {
-    font-size: 2rem;
-    line-height: 2rem;
-    max-width: 475px;
-  }
-`
 export default BuyForm

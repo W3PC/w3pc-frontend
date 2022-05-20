@@ -2,33 +2,45 @@ import React from 'react'
 import styled from 'styled-components'
 import { Switch, Route } from 'react-router-dom'
 
-import Header from '../pages/Header'
+import { AppShell, Footer, useMantineTheme } from '@mantine/core'
+
+import PageHeader from '../pages/PageHeader'
 import Cashier from '../pages/Cashier'
 import JoinGame from '../pages/JoinGame'
 import HostGame from '../pages/HostGame'
 import CreateAccount from '../pages/CreateAccount'
 
 const Layout = () => {
+  const theme = useMantineTheme()
+
   return (
-    <Container>
-      <Header />
-      <Body>
-        <Switch>
-          <Route path='/join'>
-            <JoinGame />
-          </Route>
-          <Route path='/host'>
-            <HostGame />
-          </Route>
-          <Route path='/createAccount'>
-            <CreateAccount />
-          </Route>
-          <Route path='/'>
-            <Cashier />
-          </Route>
-        </Switch>
-      </Body>
-    </Container>
+    <AppShell
+      styles={(theme) => ({
+        main: {
+          backgroundColor:
+            theme.colorScheme === 'dark'
+              ? theme.colors.dark[8]
+              : theme.colors.gray[0],
+        },
+      })}
+      header={<PageHeader />}
+      fixed
+    >
+      <Switch>
+        <Route path='/join'>
+          <JoinGame />
+        </Route>
+        <Route path='/host'>
+          <HostGame />
+        </Route>
+        <Route path='/createAccount'>
+          <CreateAccount />
+        </Route>
+        <Route path='/'>
+          <Cashier />
+        </Route>
+      </Switch>
+    </AppShell>
   )
 }
 

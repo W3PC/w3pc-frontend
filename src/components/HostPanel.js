@@ -3,8 +3,9 @@ import { useQuery } from 'urql'
 import { utils } from 'ethers'
 import PlayerRow from './PlayerRow'
 import styled from 'styled-components'
+import { Accordion, Group, Text, Container } from '@mantine/core'
 
-const HostPanel = ({ gameId }) => {
+const HostPanel = ({ gameId, totalGameCredits, totalGameChips }) => {
   const [errors, setErrors] = useState('')
 
   const setErrorFunc = (error) => {
@@ -29,29 +30,47 @@ const HostPanel = ({ gameId }) => {
   })
 
   const { data, fetching, error } = result
-
   if (fetching) return <p>Loading...</p>
   if (error) return <p>Oh no... {error.message}</p>
 
   return (
     <>
       {errors && <div style={{ color: 'red' }}>{errors}</div>}
-      <PlayerTable>
-        <tbody>
-          {data.game?.players &&
-            data.game.players.map((player) => (
+      <Container p='xl'>
+        <Accordion>
+          {data.game.players.map((player) => (
+            <Accordion.Item
+              label={
+                <AccordionLabel
+                  userName={utils.parseBytes32String(player.player.name)}
+                  credits={player.credits}
+                />
+              }
+              key={player.player.id}
+            >
               <PlayerRow
-                userName={utils.parseBytes32String(player.player.name)}
                 id={player.player.id}
                 credits={player.credits}
                 key={player.player.id}
                 gameAddress={gameId.toLowerCase()}
                 setErrors={setErrorFunc}
+                totalGameCredits={totalGameCredits}
+                totalGameChips={totalGameChips}
               />
-            ))}
-        </tbody>
-      </PlayerTable>
+            </Accordion.Item>
+          ))}
+        </Accordion>
+      </Container>
     </>
+  )
+}
+
+const AccordionLabel = ({ gameCredits, userName, credits }) => {
+  return (
+    <Group noWrap>
+      <Text>{userName}</Text>
+      <Text>{credits} Credits</Text>
+    </Group>
   )
 }
 

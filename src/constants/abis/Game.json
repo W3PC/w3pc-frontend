@@ -86,19 +86,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "amount_",
-        "type": "uint256"
-      }
-    ],
-    "name": "addChips",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "player_",
         "type": "address"
@@ -159,7 +146,7 @@
         "type": "address"
       }
     ],
-    "name": "getAdmins",
+    "name": "isAdmin",
     "outputs": [
       {
         "internalType": "bool",
@@ -186,6 +173,19 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "amount_",
+        "type": "uint256"
+      }
+    ],
+    "name": "postChips",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "oldAdmin_",
         "type": "address"
@@ -204,7 +204,7 @@
         "type": "uint256"
       }
     ],
-    "name": "returnChips",
+    "name": "tip",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -220,6 +220,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount_",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawChips",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

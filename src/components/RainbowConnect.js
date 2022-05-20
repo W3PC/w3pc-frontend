@@ -1,6 +1,6 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import styled from 'styled-components'
-import Button from './Button'
+import { Button, Text } from '@mantine/core'
 import { useChainState } from '../hooks/useChainState'
 import { utils } from 'ethers'
 import { zeroAddress } from '../constants'
@@ -32,7 +32,7 @@ export const RainbowConnect = () => {
             {(() => {
               if (!mounted || !account || !chain) {
                 return (
-                  <Button green onClick={openConnectModal} type='button'>
+                  <Button onClick={openConnectModal} type='button'>
                     Connect Wallet
                   </Button>
                 )
@@ -40,34 +40,28 @@ export const RainbowConnect = () => {
 
               if (chain.unsupported) {
                 return (
-                  <Button green onClick={openChainModal} type='button'>
+                  <Button onClick={openChainModal} type='button'>
                     Wrong network
                   </Button>
                 )
               }
 
               return (
-                <Container>
-                  <AccountInfo onClick={openAccountModal} type='button'>
-                    <div>
+                <Button onClick={openAccountModal} variant='subtle' size='lg'>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <Text>
                       Account:{' '}
                       {userName?.data && userName.data !== zeroAddress
                         ? utils.parseBytes32String(userName.data)
                         : account.displayName}
-                    </div>
-                    <div>
+                    </Text>
+                    <Text>
                       {`${userChips?.data?.toString()} CHIPS || ${userUsdc?.data
                         ?.div(1000000)
                         .toString()} USDC`}
-                    </div>
-                    {account.hasPendingTransactions && (
-                      <div style={{ color: '#C4D736', display: 'flex' }}>
-                        <ClipLoader color='#C4D736' size='1rem' /> Pending
-                        transactions
-                      </div>
-                    )}
-                  </AccountInfo>
-                </Container>
+                    </Text>
+                  </div>
+                </Button>
               )
             })()}
           </div>

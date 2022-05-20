@@ -38,6 +38,20 @@ export const ChainContextProvider = (props) => {
       },
     }
   )
+  const usdcAllowance = useContractRead(
+    {
+      addressOrName: usdcAddress,
+      contractInterface: erc20ABI,
+    },
+    'allowance',
+    {
+      enabled: account?.data?.address ? true : false,
+      args: [account?.data?.address, cashierAddress],
+      onError(error) {
+        console.log(error)
+      },
+    }
+  )
   const totalChips = useContractRead(
     {
       addressOrName: cashierAddress,
@@ -87,6 +101,8 @@ export const ChainContextProvider = (props) => {
     totalChips.refetch()
     userChips.refetch()
     userName.refetch()
+    account.refetch()
+    usdcAllowance.refetch()
   }
 
   return (
@@ -99,6 +115,7 @@ export const ChainContextProvider = (props) => {
         account,
         userName,
         refetchData,
+        usdcAllowance,
       }}
       {...props}
     />

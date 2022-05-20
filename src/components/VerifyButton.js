@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
-import { utils } from 'ethers'
-import Button from './Button'
+import { Button } from '@mantine/core'
 import { useSigner } from 'wagmi'
-import styled from 'styled-components'
-import Tooltip from './Tooltip/Tooltip'
+import { Tooltip } from '@mantine/core'
 
 const VerifyButton = ({}) => {
   const [signed, setSigned] = useState('')
@@ -56,8 +54,8 @@ const VerifyButton = ({}) => {
   }
 
   return (
-    <Tooltip content={tooltipText} direction='left'>
-      <Button copy onClick={(e) => handleClick(e)}>
+    <Tooltip label={tooltipText} position='left' withArrow>
+      <Button radius='xl' size='xs' compact onClick={(e) => handleClick(e)}>
         {!signed ? 'Verify' : isCopied ? 'Copied' : 'Copy signed msg'}
       </Button>
     </Tooltip>

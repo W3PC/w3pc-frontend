@@ -4,14 +4,16 @@ import { useContractRead, useContractWrite, useProvider } from 'wagmi'
 import { useChainState } from '../hooks/useChainState'
 import gameDirectoryAbi from '../constants/abis/GameDirectory.json'
 import gameAbi from '../constants/abis/Game.json'
+import cashierAbi from '../constants/abis/Cashier.json'
 import {
+  cashierAddress,
   gameDirectoryAddress,
   zeroAddress,
   zeroUserAddress,
 } from '../constants'
 import HostPanel from '../components/HostPanel'
 import CopyButton from '../components/CopyButton'
-import Button from '../components/Button'
+import { Button, Group, Title, Stack, Center } from '@mantine/core'
 
 const HostGame = () => {
   const [errors, setErrors] = useState('')
@@ -69,6 +71,19 @@ const HostGame = () => {
         hostedGame?.data && hostedGame.data !== zeroAddress ? true : false,
     }
   )
+
+  const totalGameChips = useContractRead(
+    {
+      addressOrName: cashierAddress,
+      contractInterface: cashierAbi,
+    },
+    'balanceOf',
+    {
+      enabled:
+        hostedGame?.data && hostedGame.data !== zeroAddress ? true : false,
+      args: [hostedGame?.data],
+    }
+  )
   const handleClick = (e) => {
     e.preventDefault()
     if (!userName.data || userName.data === zeroUserAddress) {
@@ -80,47 +95,68 @@ const HostGame = () => {
     createGame.write()
   }
   return (
-    <Container>
+    <>
       {hostedGame.data === zeroAddress && hostedGame.data && (
-        <div>
-          <div>Your Hosted Game</div>
-          <h2 style={{ color: 'red' }}>No Game Detected</h2>
-          <Button
-            onClick={(e) => handleClick(e)}
-            disabled={createGame.isLoading}
-          >
-            {loading ? 'Creating...' : 'Create Game'}
-          </Button>
-        </div>
+        <Center>
+          <Stack>
+            <Title order={1}>Your Hosted Game</Title>
+            <Title order={2} color='red'>
+              No Game Detected
+            </Title>
+            <Button
+              onClick={(e) => handleClick(e)}
+              disabled={createGame.isLoading}
+            >
+              {loading ? 'Creating...' : 'Create Game'}
+            </Button>
+          </Stack>
+        </Center>
       )}
       {hostedGame.data !== zeroAddress && hostedGame.data && (
         <>
-          <GameInfo>
-            <GameId>
-              <div>GAME ID:</div>
-              <div style={{ fontWeight: 'bold' }}>
+          <Group position='center' align='baseline' spacing={50}>
+            <Stack spacing='xs'>
+              <Title order={3}>Game ID:</Title>
+              <Title order={4} style={{ fontWeight: 'bold' }}>
                 {`${hostedGame?.data?.substring(0, 14)}...`}
-              </div>
-              <div>
+              </Title>
+              <Group>
                 <CopyButton text={hostedGame.data} />
-                <Button copy style={{ marginLeft: '1rem' }}>
+                <Button radius='xl' size='xs' compact>
                   Contract
                 </Button>
-              </div>
-            </GameId>
+              </Group>
+            </Stack>
 
-            <GameId style={{ marginLeft: '10%' }}>
-              <div>Total CHIPS in Game</div>
-              <div style={{ fontWeight: 'bold', alignSelf: 'center' }}>
+            <Stack spacing='xs'>
+              <Title order={3}>Total CHIPS in Game</Title>
+              <Title
+                order={4}
+                style={{ fontWeight: 'bold', alignSelf: 'center' }}
+              >
                 {totalGameCredits?.data?.toNumber()} CHIPS
-              </div>
-            </GameId>
-          </GameInfo>
-          <HostPanel gameId={hostedGame.data} />
+              </Title>
+            </Stack>
+            <Stack spacing='xs'>
+              <Title order={3}>Unassigned CHIPS</Title>
+              <Title
+                order={4}
+                style={{ fontWeight: 'bold', alignSelf: 'center' }}
+              >
+                {totalGameChips?.data?.sub(totalGameCredits?.data).toNumber()}{' '}
+                CHIPS
+              </Title>
+            </Stack>
+          </Group>
+          <HostPanel
+            gameId={hostedGame.data}
+            totalGameCredits={totalGameCredits}
+            totalGameChips={totalGameChips}
+          />
         </>
       )}
       {errors && <div style={{ color: 'red' }}>{errors}</div>}
-    </Container>
+    </>
   )
 }
 

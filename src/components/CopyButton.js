@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
+import { Button } from '@mantine/core'
 
 const CopyButton = ({ text }) => {
   const [isCopied, setIsCopied] = useState(false)
@@ -27,24 +28,10 @@ const CopyButton = ({ text }) => {
       })
   }
   return (
-    <Button onClick={() => handleCopyClick()}>
-      {isCopied ? 'Copied!' : 'Copy to Clipboard'}
+    <Button onClick={() => handleCopyClick()} radius='xl' size='xs' compact>
+      {isCopied ? 'Copied!' : 'Copy'}
     </Button>
   )
 }
-
-const Button = styled.button`
-  color: white;
-  background: #101826;
-  border: 1px solid #101826;
-  border-radius: 5px;
-  font-size: 1rem;
-  margin-top: 0.5em;
-
-  &:hover {
-    border-color: #64748b;
-    background: #64748b;
-  }
-`
 
 export default CopyButton

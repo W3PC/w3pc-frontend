@@ -5,10 +5,13 @@ import SellForm from '../components/SellForm'
 import { useChainState } from '../hooks/useChainState'
 import { useHistory } from 'react-router-dom'
 import { zeroAddress, zeroUserAddress } from '../constants'
+import { Grid, Stack, Title, Paper } from '@mantine/core'
 
 const Cashier = () => {
   const chainState = useChainState()
   const history = useHistory()
+  console.log(chainState)
+
   useEffect(() => {
     if (
       chainState.account?.data?.address &&
@@ -20,102 +23,84 @@ const Cashier = () => {
       history.push('/createAccount')
     }
   }, [chainState.userName, chainState.account])
-  return (
-    <Container>
-      <DataContainer>
-        <Data>
-          <div>Total Chips in Circulation</div>
-          <div style={{ fontWeight: 'bold' }}>
-            {chainState?.totalChips?.data?.toNumber()} Chips
-          </div>
-        </Data>
 
-        <Data>
-          <div>Your CHIPS in Wallet</div>
-          {chainState.account.data ? (
-            <div style={{ fontWeight: 'bold' }}>
-              {chainState?.userChips?.data?.toNumber()} CHIPS
+  return (
+    <Grid justify='center' align='center' style={{ height: 800 }}>
+      <Grid.Col xs={10} sm={6} xl={4}>
+        <Paper
+          p='xl'
+          shadow='0px 1px 3px rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 0px 20px 25px -5px, rgba(0, 0, 0, 0.14) 0px 10px 10px -5px'
+        >
+          <Stack spacing='xl' align='center'>
+            <div>
+              <Title order={2} align='center'>
+                Total Chips in Circulation
+              </Title>
+              <Title order={3} align='center'>
+                {chainState?.totalChips?.data?.toNumber()} CHIPS
+              </Title>
             </div>
-          ) : (
-            <div style={{ fontWeight: 'bold' }}>????</div>
-          )}
-        </Data>
-        <Data>
-          <BuyForm
-            userUsdc={chainState?.userUsdc}
-            update={chainState.refetchData}
-          />
-        </Data>
-      </DataContainer>
-      <DataContainer>
-        <Data>
-          <div>USDC in the Cashier</div>
-          <div style={{ fontWeight: 'bold' }}>
-            {chainState?.cashierUsdc?.data?.div(1000000).toNumber()} USDC
-          </div>
-        </Data>
-        <Data>
-          <div>USDC in Wallet</div>
-          {chainState.account.data ? (
-            <div style={{ fontWeight: 'bold' }}>
-              {chainState?.userUsdc?.data?.div(1000000).toNumber()} USDC
+
+            <div>
+              <Title order={2} align='center'>
+                Your CHIPS in Wallet
+              </Title>
+              {chainState.account.data ? (
+                <Title order={3} align='center'>
+                  {chainState?.userChips?.data?.toNumber()} CHIPS
+                </Title>
+              ) : (
+                <Title order={3} align='center'>
+                  ????
+                </Title>
+              )}
             </div>
-          ) : (
-            <div style={{ fontWeight: 'bold' }}>????</div>
-          )}
-        </Data>
-        <Data>
-          <SellForm
-            userChips={chainState.userChips}
-            update={chainState.refetchData}
-          />
-        </Data>
-      </DataContainer>
-    </Container>
+            <BuyForm
+              userUsdc={chainState?.userUsdc}
+              update={chainState.refetchData}
+              allowance={chainState?.usdcAllowance}
+            />
+          </Stack>
+        </Paper>
+      </Grid.Col>
+
+      <Grid.Col xs={10} sm={6} xl={4}>
+        <Paper
+          shadow='0px 1px 3px rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 0px 20px 25px -5px, rgba(0, 0, 0, 0.14) 0px 10px 10px -5px'
+          p='xl'
+        >
+          <Stack align='center' spacing='xl'>
+            <div>
+              <Title order={2} align='center'>
+                USDC in the Cashier
+              </Title>
+              <Title order={3} align='center'>
+                {chainState?.cashierUsdc?.data?.div(1000000).toNumber()} USDC
+              </Title>
+            </div>
+            <div>
+              <Title order={2} align='center'>
+                USDC in Wallet
+              </Title>
+              {chainState.account.data ? (
+                <Title order={3} align='center'>
+                  {chainState?.userUsdc?.data?.div(1000000).toNumber()} USDC
+                </Title>
+              ) : (
+                <Title order={3} align='center'>
+                  ????
+                </Title>
+              )}
+            </div>
+            <SellForm
+              userChips={chainState.userChips}
+              update={chainState.refetchData}
+            />
+          </Stack>
+        </Paper>
+      </Grid.Col>
+    </Grid>
   )
 }
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: center;
-  font-size: 1rem;
-  font-weight: 500;
-  @media (min-width: 576px) {
-    font-size: 1.5rem;
-  }
-  @media (min-width: 768px) {
-    font-size: 2rem;
-  }
-  @media (min-width: 992px) {
-    font-size: 2.5rem;
-  }
-  @media (min-width: 1200px) {
-    font-size: 2.5rem;
-  }
-`
-const DataContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  margin: 1rem;
-  @media (min-width: 576px) {
-    margin: 2rem;
-  }
-  @media (min-width: 768px) {
-    margin: 4rem;
-  }
-  @media (min-width: 992px) {
-    margin: 5rem;
-  }
-`
-const Data = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  padding-top: 5rem;
-  text-align: center;
-`
 
 export default Cashier
