@@ -38,7 +38,7 @@ const HostPanel = ({ gameId, totalGameCredits, totalGameChips }) => {
       {errors && <div style={{ color: 'red' }}>{errors}</div>}
       <Container p='xl'>
         <Accordion>
-          {data.game.players.map((player) => (
+          {data?.game?.players?.map((player) => (
             <Accordion.Item
               label={
                 <AccordionLabel
