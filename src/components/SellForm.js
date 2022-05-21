@@ -4,9 +4,13 @@ import cashierAbi from '../constants/abis/Cashier.json'
 import { cashierAddress } from '../constants'
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { Title, NumberInput, Button } from '@mantine/core'
+import {
+  showPendingTxn,
+  updatePendingTxn,
+} from '../notifications/txnNotification'
 
 const SellForm = ({ userChips, update }) => {
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState(0)
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('unapproved')
   const addRecentTransaction = useAddRecentTransaction()
@@ -36,21 +40,25 @@ const SellForm = ({ userChips, update }) => {
     {
       onSettled(data) {
         if (data) {
+          const hash = data.hash
+          showPendingTxn(hash)
           addRecentTransaction({
-            hash: data.hash,
+            hash: hash,
             description: `Sold ${value} CHIPS`,
           })
           data
             .wait()
             .then((data) => {
               if (data) {
-                setValue('')
+                updatePendingTxn(hash)
+                setValue(0)
                 setErrors({})
                 setStatus('success')
                 update()
               }
             })
             .catch((error) => {
+              updatePendingTxn(hash, true)
               console.log(error)
               setStatus('unapproved')
               setErrors({
@@ -67,7 +75,7 @@ const SellForm = ({ userChips, update }) => {
           sellTokens:
             'There was an error completing your transaction please try again',
         })
-        setValue('')
+        setValue(0)
         setStatus('unapproved')
       },
       overrides(data) {
@@ -92,12 +100,9 @@ const SellForm = ({ userChips, update }) => {
         hideControls
         error={errors?.sellTokens}
       />
-      <Button onClick={sellChips} disabled={status === 'buying'}>
+      <Button onClick={sellChips} loading={status === 'buying'}>
         {status === 'buying' ? 'Confirming Txn...' : 'Sell Chips'}
       </Button>
-      {status === 'success' && (
-        <div style={{ color: 'green' }}>Transaction was a success!</div>
-      )}
     </>
   )
 }

@@ -2,7 +2,14 @@ import React, { useState } from 'react'
 import { useQuery } from 'urql'
 import { utils } from 'ethers'
 import PlayerRow from './PlayerRow'
-import { Accordion, Group, Text, Container } from '@mantine/core'
+import {
+  Accordion,
+  Group,
+  Text,
+  Container,
+  Loader,
+  Center,
+} from '@mantine/core'
 
 const HostPanel = ({ gameId, totalGameCredits, totalGameChips }) => {
   const [errors, setErrors] = useState('')
@@ -29,7 +36,12 @@ const HostPanel = ({ gameId, totalGameCredits, totalGameChips }) => {
   })
 
   const { data, fetching, error } = result
-  if (fetching) return <p>Loading...</p>
+  if (fetching)
+    return (
+      <Center>
+        <Loader size='xl' m='xl' />
+      </Center>
+    )
   if (error) return <p>Oh no... {error.message}</p>
 
   return (

@@ -5,6 +5,10 @@ import cashierAbi from '../constants/abis/Cashier.json'
 import { cashierAddress, usdcAddress } from '../constants'
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { Title, NumberInput, Button, Group, Checkbox } from '@mantine/core'
+import {
+  showPendingTxn,
+  updatePendingTxn,
+} from '../notifications/txnNotification'
 
 const BuyForm = ({ userUsdc, update, allowance }) => {
   const [value, setValue] = useState(0)
@@ -37,23 +41,27 @@ const BuyForm = ({ userUsdc, update, allowance }) => {
           buyTokens:
             'There was an error approving your transaction please try again',
         })
-        setValue('')
+        setValue(0)
         setStatus('unapproved')
       },
       onSuccess(data) {
         if (data) {
+          const hash = data.hash
+          showPendingTxn(hash)
           addRecentTransaction({
-            hash: data.hash,
+            hash: hash,
             description: `Approved ${value} USDC to be spent on CHIPS`,
           })
           data
             .wait()
             .then((data) => {
               if (data) {
+                updatePendingTxn(hash)
                 setStatus('approved')
               }
             })
             .catch((e) => {
+              updatePendingTxn(hash, true)
               setErrors({
                 buyTokens:
                   'There was an error with your approval please try again',
@@ -101,21 +109,26 @@ const BuyForm = ({ userUsdc, update, allowance }) => {
     {
       onSettled(data) {
         if (data) {
+          const hash = data.hash
+          showPendingTxn(hash)
+
           addRecentTransaction({
-            hash: data.hash,
+            hash: hash,
             description: `Bought ${value} CHIPS`,
           })
           data
             .wait()
             .then((data) => {
               if (data) {
-                setValue('')
+                updatePendingTxn(hash)
+                setValue(0)
                 setErrors({})
                 setStatus('success')
                 update()
               }
             })
             .catch((error) => {
+              updatePendingTxn(hash, true)
               setStatus('approved')
               setErrors({
                 buyTokens:
@@ -158,7 +171,7 @@ const BuyForm = ({ userUsdc, update, allowance }) => {
       <Group>
         <Button
           onClick={buyChips}
-          disabled={status === 'approving' || status === 'buying'}
+          loading={status === 'approving' || status === 'buying'}
         >
           {!value || status === 'approved' || status === 'success'
             ? 'Buy CHIPS'
@@ -178,9 +191,6 @@ const BuyForm = ({ userUsdc, update, allowance }) => {
           />
         )}
       </Group>
-      {status === 'success' && (
-        <div style={{ color: 'green' }}>Transaction was a success!</div>
-      )}
     </>
   )
 }

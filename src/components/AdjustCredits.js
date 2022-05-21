@@ -6,6 +6,10 @@ import gameAbi from '../constants/abis/Game.json'
 import { BigNumber, constants } from 'ethers'
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { Button, Group, NumberInput, Text, Title } from '@mantine/core'
+import {
+  showPendingTxn,
+  updatePendingTxn,
+} from '../notifications/txnNotification'
 
 const AdjustCredits = ({ gameId, updateValues, playerId }) => {
   const [inputValue, setInputValue] = useState('')
@@ -55,18 +59,23 @@ const AdjustCredits = ({ gameId, updateValues, playerId }) => {
       },
       onSuccess(data) {
         if (data) {
+          const hash = data.hash
+
+          showPendingTxn(hash)
           addRecentTransaction({
-            hash: data.hash,
-            description: `Approved ${inputValue} CHIPS to be sent to Game: ${gameId}`,
+            hash: hash,
+            description: `Approved CHIPS to be able to be sent to Game: ${gameId}`,
           })
           data
             .wait()
             .then((data) => {
               if (data) {
+                updatePendingTxn(hash)
                 setDepositStatus('approved')
               }
             })
             .catch((e) => {
+              updatePendingTxn(hash, true)
               setErrors(
                 'There was an error with your approval please try again'
               )
@@ -86,14 +95,17 @@ const AdjustCredits = ({ gameId, updateValues, playerId }) => {
     {
       onSettled(data) {
         if (data) {
+          const hash = data.hash
+          showPendingTxn(hash)
           addRecentTransaction({
-            hash: data.hash,
+            hash: hash,
             description: `Tipped ${inputValue} CHIPS to Game: ${gameId}`,
           })
           data
             .wait()
             .then((data) => {
               if (data) {
+                updatePendingTxn(hash)
                 setInputValue('')
                 setErrors('')
                 setTipStatus('success')
@@ -101,6 +113,7 @@ const AdjustCredits = ({ gameId, updateValues, playerId }) => {
               }
             })
             .catch((error) => {
+              updatePendingTxn(hash, true)
               setTipStatus('unapproved')
               setErrors(
                 'There was an error with your transaction Please try again'
@@ -127,6 +140,8 @@ const AdjustCredits = ({ gameId, updateValues, playerId }) => {
     {
       onSettled(data) {
         if (data) {
+          const hash = data.hash
+          showPendingTxn(hash)
           addRecentTransaction({
             hash: data.hash,
             description: `Added ${inputValue} CHIPS to Game: ${gameId}`,
@@ -135,6 +150,7 @@ const AdjustCredits = ({ gameId, updateValues, playerId }) => {
             .wait()
             .then((data) => {
               if (data) {
+                updatePendingTxn(hash)
                 setInputValue('')
                 setErrors('')
                 setDepositStatus('success')
@@ -142,6 +158,7 @@ const AdjustCredits = ({ gameId, updateValues, playerId }) => {
               }
             })
             .catch((error) => {
+              updatePendingTxn(hash, true)
               setDepositStatus('approved')
               setErrors(
                 'There was an error with your transaction Please try again'
@@ -172,14 +189,19 @@ const AdjustCredits = ({ gameId, updateValues, playerId }) => {
     {
       onSettled(data) {
         if (data) {
+          const hash = data.hash
+
+          showPendingTxn(hash)
+
           addRecentTransaction({
-            hash: data.hash,
+            hash: hash,
             description: `Withdrew ${inputValue} CHIPS from Game: ${gameId} `,
           })
           data
             .wait()
             .then((data) => {
               if (data) {
+                updatePendingTxn(hash)
                 setInputValue('')
                 setErrors('')
                 setWithdrawStatus('success')
@@ -187,6 +209,7 @@ const AdjustCredits = ({ gameId, updateValues, playerId }) => {
               }
             })
             .catch((error) => {
+              updatePendingTxn(hash, true)
               setWithdrawStatus('unapproved')
               setErrors(
                 'There was an error with your transaction Please try again'
@@ -275,7 +298,7 @@ const AdjustCredits = ({ gameId, updateValues, playerId }) => {
         <Button
           color={'teal'}
           onClick={(e) => postChips(e)}
-          disabled={depositStatus === 'buying'}
+          loading={depositStatus === 'buying'}
         >
           {inputValue && depositStatus === 'unapproved'
             ? 'Approve'
@@ -290,14 +313,14 @@ const AdjustCredits = ({ gameId, updateValues, playerId }) => {
         <Button
           color='violet'
           onClick={(e) => withdrawChips(e)}
-          disabled={withdrawStatus === 'withdrawing'}
+          loading={withdrawStatus === 'withdrawing'}
         >
           {withdrawStatus === 'withdrawing' ? 'Completing Txn...' : 'Withdraw'}
         </Button>
         <Button
           color='grape'
           onClick={(e) => tipChips(e)}
-          disabled={tipStatus === 'tipping'}
+          loading={tipStatus === 'tipping'}
         >
           {tipStatus === 'tipping' ? 'Completing Txn...' : 'Tip Game'}
         </Button>

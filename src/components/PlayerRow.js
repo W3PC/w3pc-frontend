@@ -5,6 +5,10 @@ import { utils, BigNumber } from 'ethers'
 import { addCreditsErr, deductCreditsErr } from '../constants'
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { NumberInput, Stack, Slider, Text, Button } from '@mantine/core'
+import {
+  showPendingTxn,
+  updatePendingTxn,
+} from '../notifications/txnNotification'
 
 const PlayerRow = ({ id, gameAddress, totalGameCredits, totalGameChips }) => {
   const [inputValue, setInputValue] = useState(0)
@@ -35,14 +39,19 @@ const PlayerRow = ({ id, gameAddress, totalGameCredits, totalGameChips }) => {
       onSuccess(data) {
         console.log('here')
         if (data) {
+          const hash = data.hash
+
+          showPendingTxn(hash)
+
           addRecentTransaction({
-            hash: data.hash,
+            hash: hash,
             description: `Added ${inputValue} game credits to ${id}`,
           })
           data
             .wait()
             .then((data) => {
               if (data) {
+                updatePendingTxn(hash)
                 console.log(data)
                 gameCredits.refetch()
                 setLoading(false)
@@ -51,6 +60,7 @@ const PlayerRow = ({ id, gameAddress, totalGameCredits, totalGameChips }) => {
             })
             .catch((error) => {
               console.log(error)
+              updatePendingTxn(hash, true)
               setErrors('There was an error adding credits please try again')
             })
         }
@@ -77,14 +87,19 @@ const PlayerRow = ({ id, gameAddress, totalGameCredits, totalGameChips }) => {
     {
       onSuccess(data) {
         if (data) {
+          const hash = data.hash
+
+          showPendingTxn(hash)
+
           addRecentTransaction({
-            hash: data.hash,
+            hash: hash,
             description: `Deducted ${inputValue} game credits from ${id}`,
           })
           data
             .wait()
             .then((data) => {
               if (data) {
+                updatePendingTxn(hash)
                 console.log(data)
                 gameCredits.refetch()
                 setLoading(false)
@@ -92,6 +107,7 @@ const PlayerRow = ({ id, gameAddress, totalGameCredits, totalGameChips }) => {
               }
             })
             .catch((error) => {
+              updatePendingTxn(hash, true)
               console.log(error)
               setLoading(false)
               setErrors(
@@ -204,7 +220,7 @@ const PlayerRow = ({ id, gameAddress, totalGameCredits, totalGameChips }) => {
       <Button
         color={inputValue > 0 ? 'green' : inputValue < 0 ? 'violet' : 'blue'}
         onClick={(e) => handleClick(e)}
-        disabled={loading}
+        loading={loading}
       >
         {loading
           ? 'Completing...'

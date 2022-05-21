@@ -5,11 +5,17 @@ import { utils } from 'ethers'
 import { accountAddress } from '../constants'
 import { useChainState } from '../hooks/useChainState'
 import { Text, TextInput, Container, Title, Button, Stack } from '@mantine/core'
+import {
+  showPendingTxn,
+  updatePendingTxn,
+} from '../notifications/txnNotification'
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 
 const CreateAccount = () => {
   const [input, setInput] = useState('')
-  const [error, setError] = useState(null)
+  const [error, setError] = useState('')
   const { refetchData } = useChainState()
+  const addRecentTransaction = useAddRecentTransaction()
 
   const register = useContractWrite(
     {
@@ -20,9 +26,23 @@ const CreateAccount = () => {
     {
       onSettled(data) {
         if (data) {
-          data.wait().then((data) => {
-            refetchData()
+          const hash = data.hash
+          showPendingTxn(hash)
+          addRecentTransaction({
+            hash: hash,
+            description: `Set ${input} as account name`,
           })
+          data
+            .wait()
+            .then((data) => {
+              updatePendingTxn(hash)
+              refetchData()
+            })
+            .catch((e) => {
+              console.log(e)
+              updatePendingTxn(hash, true)
+              setError('There was an error with your transaction')
+            })
         }
       },
     }
@@ -59,7 +79,7 @@ const CreateAccount = () => {
           error={error}
         />
         <Text align='center'>This can only be done once. Choose wisely!</Text>
-        <Button onClick={(e) => registerName(e)} disabled={register.isLoading}>
+        <Button onClick={(e) => registerName(e)} loading={register.isLoading}>
           {register.isLoading || register.isSuccess
             ? 'Registering...'
             : 'Set Name'}

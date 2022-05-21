@@ -14,11 +14,17 @@ import HostPanel from '../components/HostPanel'
 import CopyButton from '../components/CopyButton'
 import { Button, Group, Title, Stack, Center } from '@mantine/core'
 import CreateAccount from './CreateAccount'
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
+import {
+  showPendingTxn,
+  updatePendingTxn,
+} from '../notifications/txnNotification'
 
 const HostGame = () => {
   const [errors, setErrors] = useState('')
   const [loading, setLoading] = useState(false)
   const { userName, account } = useChainState()
+  const addRecentTransaction = useAddRecentTransaction()
 
   const provider = useProvider()
 
@@ -43,10 +49,28 @@ const HostGame = () => {
     {
       onSuccess(data) {
         if (data) {
-          data.wait().then((data) => {
-            setLoading(false)
-            hostedGame.refetch()
+          const hash = data.hash
+
+          showPendingTxn(hash)
+
+          addRecentTransaction({
+            hash: hash,
+            description: `Created a game`,
           })
+          data
+            .wait()
+            .then((data) => {
+              updatePendingTxn(hash)
+              setLoading(false)
+              hostedGame.refetch()
+            })
+            .catch((e) => {
+              console.log(e)
+              updatePendingTxn(hash, true)
+              setErrors(
+                'There was an error trying to create you game please try again'
+              )
+            })
         }
       },
       onError(error, data) {
@@ -129,7 +153,15 @@ const HostGame = () => {
               </Title>
               <Group>
                 <CopyButton text={hostedGame.data} />
-                <Button radius='xl' size='xs' compact>
+                <Button
+                  radius='xl'
+                  size='xs'
+                  compact
+                  component='a'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  href={`https://snowtrace.io/address/${hostedGame.data}`}
+                >
                   Contract
                 </Button>
               </Group>

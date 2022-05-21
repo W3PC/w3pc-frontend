@@ -7,7 +7,7 @@ import gameAbi from '../constants/abis/Game.json'
 import CopyButton from './CopyButton'
 import AdjustCredits from './AdjustCredits'
 import VerifyButton from './VerifyButton'
-import { Grid, Title, Stack } from '@mantine/core'
+import { Grid, Title, Stack, Group, Button } from '@mantine/core'
 
 const GameView = ({ gameId, setGameLoaded }) => {
   const { account } = useChainState()
@@ -75,7 +75,20 @@ const GameView = ({ gameId, setGameLoaded }) => {
           <div>
             <Title order={3}>Game ID:</Title>
             <Title order={4}>{`${gameId.substring(0, 14)}...`}</Title>
-            <CopyButton text={gameId} />
+            <Group>
+              <CopyButton text={gameId} />
+              <Button
+                radius='xl'
+                size='xs'
+                compact
+                component='a'
+                target='_blank'
+                rel='noopener noreferrer'
+                href={`https://snowtrace.io/address/${gameId}`}
+              >
+                Contract
+              </Button>
+            </Group>
           </div>
           <div>
             <Title order={3}>Total credits in Game</Title>

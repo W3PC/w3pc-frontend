@@ -5,6 +5,7 @@ import Layout from './Layout'
 import { createClient, Provider as UrqlProvider } from 'urql'
 import { MantineProvider, ColorSchemeProvider } from '@mantine/core'
 import { useHotkeys, useLocalStorage } from '@mantine/hooks'
+import { NotificationsProvider } from '@mantine/notifications'
 
 function App() {
   const client = createClient({
@@ -31,7 +32,9 @@ function App() {
         >
           <MantineProvider theme={{ colorScheme }} withGlobalStyles>
             <ChainContextProvider>
-              <Layout />
+              <NotificationsProvider>
+                <Layout />
+              </NotificationsProvider>
             </ChainContextProvider>
           </MantineProvider>
         </ColorSchemeProvider>
