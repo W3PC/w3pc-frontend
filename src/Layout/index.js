@@ -1,18 +1,14 @@
 import React from 'react'
-import styled from 'styled-components'
 import { Switch, Route } from 'react-router-dom'
 
-import { AppShell, Footer, useMantineTheme } from '@mantine/core'
+import { AppShell } from '@mantine/core'
 
 import PageHeader from '../pages/PageHeader'
 import Cashier from '../pages/Cashier'
 import JoinGame from '../pages/JoinGame'
 import HostGame from '../pages/HostGame'
-import CreateAccount from '../pages/CreateAccount'
 
 const Layout = () => {
-  const theme = useMantineTheme()
-
   return (
     <AppShell
       styles={(theme) => ({
@@ -33,9 +29,6 @@ const Layout = () => {
         <Route path='/host'>
           <HostGame />
         </Route>
-        <Route path='/createAccount'>
-          <CreateAccount />
-        </Route>
         <Route path='/'>
           <Cashier />
         </Route>
@@ -45,15 +38,3 @@ const Layout = () => {
 }
 
 export default Layout
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-  width: 100%;
-`
-const Body = styled.div`
-  height: 80vh;
-  width: 100%;
-`

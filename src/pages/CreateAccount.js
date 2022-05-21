@@ -1,17 +1,16 @@
 import React, { useState } from 'react'
-import styled from 'styled-components'
 import accountAbi from '../constants/abis/Account.json'
 import { useContractWrite } from 'wagmi'
-import { useHistory } from 'react-router-dom'
 import { utils } from 'ethers'
 import { accountAddress } from '../constants'
 import { useChainState } from '../hooks/useChainState'
+import { Text, TextInput, Container, Title, Button, Stack } from '@mantine/core'
 
 const CreateAccount = () => {
   const [input, setInput] = useState('')
   const [error, setError] = useState(null)
-  const { refetch } = useChainState()
-  const history = useHistory()
+  const { refetchData } = useChainState()
+
   const register = useContractWrite(
     {
       addressOrName: accountAddress,
@@ -22,8 +21,7 @@ const CreateAccount = () => {
       onSettled(data) {
         if (data) {
           data.wait().then((data) => {
-            refetch()
-            history.push('/')
+            refetchData()
           })
         }
       },
@@ -47,59 +45,33 @@ const CreateAccount = () => {
 
   return (
     <Container>
-      <div>No account detected.</div>
-      <div>To use this app, please choose a name: </div>
-      <Form onSubmit={(e) => registerName(e)}>
-        <Input
+      <Stack align='center'>
+        <Title order={3} align='center'>
+          No account detected.
+        </Title>
+        <Title order={4} align='center'>
+          To use this app, please choose a name:{' '}
+        </Title>
+        <TextInput
           type='text'
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          error={error}
         />
-        <br />
-        <div>This can only be done once. Choose wisely!</div>
-        <Button type='submit' disabled={register.isLoading}>
+        <Text align='center'>This can only be done once. Choose wisely!</Text>
+        <Button onClick={(e) => registerName(e)} disabled={register.isLoading}>
           {register.isLoading || register.isSuccess
             ? 'Registering...'
             : 'Set Name'}
         </Button>
-        {error && <div style={{ color: 'red' }}>{error}</div>}
         {register.isError && (
-          <div style={{ color: 'red' }}>
+          <Text align='center' color='red'>
             There was an error registering your name please try again
-          </div>
+          </Text>
         )}
-      </Form>
+      </Stack>
     </Container>
   )
 }
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 10%;
-  height: 80%;
-  width: 100%;
-  font-size: 1.5rem;
-`
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-`
-
-const Input = styled.input`
-  font-size: 1.5rem;
-`
-const Button = styled.button`
-  background: #4786ff;
-  color: white;
-  border: 1px solid #4786ff;
-  border-radius: 5px;
-  font-size: 1.5rem;
-  margin-top: 20px;
-  padding: 10px;
-`
 
 export default CreateAccount

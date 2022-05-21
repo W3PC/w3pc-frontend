@@ -23,6 +23,7 @@ export const ChainContextProvider = (props) => {
     {
       args: [account?.data?.address],
       enabled: account?.data?.address ? true : false,
+      watch: true,
     }
   )
   const cashierUsdc = useContractRead(

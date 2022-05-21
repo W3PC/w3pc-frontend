@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import styled from 'styled-components'
 import { useContractRead, useContractWrite, useProvider } from 'wagmi'
 import { useChainState } from '../hooks/useChainState'
 import gameDirectoryAbi from '../constants/abis/GameDirectory.json'
@@ -14,13 +13,13 @@ import {
 import HostPanel from '../components/HostPanel'
 import CopyButton from '../components/CopyButton'
 import { Button, Group, Title, Stack, Center } from '@mantine/core'
+import CreateAccount from './CreateAccount'
 
 const HostGame = () => {
   const [errors, setErrors] = useState('')
   const [loading, setLoading] = useState(false)
-  const { userName } = useChainState()
+  const { userName, account } = useChainState()
 
-  const { account } = useChainState()
   const provider = useProvider()
 
   const hostedGame = useContractRead(
@@ -69,6 +68,7 @@ const HostGame = () => {
     {
       enabled:
         hostedGame?.data && hostedGame.data !== zeroAddress ? true : false,
+      watch: true,
     }
   )
 
@@ -82,6 +82,7 @@ const HostGame = () => {
       enabled:
         hostedGame?.data && hostedGame.data !== zeroAddress ? true : false,
       args: [hostedGame?.data],
+      watch: true,
     }
   )
   const handleClick = (e) => {
@@ -93,6 +94,12 @@ const HostGame = () => {
     setErrors('')
     setLoading(true)
     createGame.write()
+  }
+  if (
+    (!userName?.data || userName?.data === zeroUserAddress) &&
+    userName?.isFetched
+  ) {
+    return <CreateAccount />
   }
   return (
     <>
@@ -159,40 +166,4 @@ const HostGame = () => {
     </>
   )
 }
-
-const Container = styled.div`
-  margin-top: 5%;
-  display: flex;
-  flex-direction: column;
-  font-size: 1rem;
-  align-items: center;
-  width: auto;
-  @media (min-width: 576px) {
-    margin: font-size: 1.1rem;
-  }
-  @media (min-width: 768px) {
-    font-size: 1.3rem;
-  }
-  @media (min-width: 992px) {
-    font-size: 1.5rem;
-  }
-`
-const GameInfo = styled.div`
-  display: flex;
-  flex-direction: row;
-  @media (min-width: 576px) {
-  }
-  @media (min-width: 768px) {
-  }
-  @media (min-width: 992px) {
-    width: 70%;
-    padding-left: 30%;
-  }
-`
-const GameId = styled.div`
-  display: flex;
-  flex-direction: column;
-  font-size: 1.5rem;
-`
-
 export default HostGame

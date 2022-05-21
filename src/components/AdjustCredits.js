@@ -1,19 +1,42 @@
-import React, { useState } from 'react'
-import styled from 'styled-components'
-import { useContractWrite } from 'wagmi'
+import React, { useState, useEffect } from 'react'
+import { useContractWrite, useContractRead } from 'wagmi'
 import cashierAbi from '../constants/abis/Cashier.json'
 import { cashierAddress } from '../constants'
 import gameAbi from '../constants/abis/Game.json'
-import { BigNumber } from 'ethers'
+import { BigNumber, constants } from 'ethers'
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
-import { Button, Group, NumberInput, Title } from '@mantine/core'
+import { Button, Group, NumberInput, Text, Title } from '@mantine/core'
 
-const AdjustCredits = ({ gameId, updateValues }) => {
+const AdjustCredits = ({ gameId, updateValues, playerId }) => {
   const [inputValue, setInputValue] = useState('')
   const [depositStatus, setDepositStatus] = useState('unapproved')
   const [withdrawStatus, setWithdrawStatus] = useState('unapproved')
+  const [tipStatus, setTipStatus] = useState('unapproved')
   const [errors, setErrors] = useState('')
   const addRecentTransaction = useAddRecentTransaction()
+
+  const approvals = useContractRead(
+    {
+      addressOrName: cashierAddress,
+      contractInterface: cashierAbi,
+    },
+    'allowance',
+    {
+      enabled: playerId ? true : false,
+      args: [playerId, gameId],
+      onError(error) {
+        console.log(error)
+      },
+      watch: true,
+    }
+  )
+  useEffect(() => {
+    if (approvals?.data && depositStatus === 'unapproved') {
+      if (inputValue > +0 && approvals.data.gt(inputValue)) {
+        setDepositStatus('approved')
+      }
+    }
+  }, [approvals?.data, inputValue, depositStatus])
 
   const approveChipsWrite = useContractWrite(
     {
@@ -50,6 +73,47 @@ const AdjustCredits = ({ gameId, updateValues }) => {
               setDepositStatus('unapproved')
             })
         }
+      },
+    }
+  )
+
+  const tipChipsWrite = useContractWrite(
+    {
+      addressOrName: gameId,
+      contractInterface: gameAbi,
+    },
+    'tip',
+    {
+      onSettled(data) {
+        if (data) {
+          addRecentTransaction({
+            hash: data.hash,
+            description: `Tipped ${inputValue} CHIPS to Game: ${gameId}`,
+          })
+          data
+            .wait()
+            .then((data) => {
+              if (data) {
+                setInputValue('')
+                setErrors('')
+                setTipStatus('success')
+                updateValues()
+              }
+            })
+            .catch((error) => {
+              setTipStatus('unapproved')
+              setErrors(
+                'There was an error with your transaction Please try again'
+              )
+            })
+        }
+      },
+      onError(error) {
+        console.log(error)
+        setErrors(
+          'There was an error completing your transaction please try again'
+        )
+        setTipStatus('unapproved')
       },
     }
   )
@@ -156,12 +220,13 @@ const AdjustCredits = ({ gameId, updateValues }) => {
 
     if (depositStatus === 'unapproved') {
       setDepositStatus('approving')
-      approveChipsWrite.write({ args: [gameId, BigNumber.from(inputValue)] })
+      approveChipsWrite.write({ args: [gameId, constants.MaxUint256] })
     } else if (depositStatus === 'approved') {
       setDepositStatus('buying')
       postChipsWrite.write({ args: [BigNumber.from(inputValue)] })
     }
   }
+
   const withdrawChips = (e) => {
     e.preventDefault()
     if (!inputValue || inputValue < 0 || window.isNaN(inputValue)) {
@@ -176,7 +241,19 @@ const AdjustCredits = ({ gameId, updateValues }) => {
     withdrawChipsWrite.write({ args: [BigNumber.from(inputValue)] })
   }
 
-  console.log(depositStatus)
+  const tipChips = (e) => {
+    e.preventDefault()
+    if (!inputValue || inputValue < 0 || window.isNaN(inputValue)) {
+      setErrors('Please input a valid amount')
+      return
+    }
+    if (tipStatus === 'success') {
+      setDepositStatus('unapproved')
+    }
+
+    setTipStatus('tipping')
+    tipChipsWrite.write({ args: [BigNumber.from(inputValue)] })
+  }
 
   return (
     <>
@@ -186,8 +263,9 @@ const AdjustCredits = ({ gameId, updateValues }) => {
         value={inputValue}
         onChange={(v) => setInputValue(v)}
         disabled={
-          (depositStatus !== 'unapproved' && depositStatus !== 'success') ||
-          (withdrawStatus !== 'unapproved' && withdrawStatus !== 'success')
+          depositStatus === 'buying' ||
+          withdrawStatus === 'withdrawing' ||
+          tipStatus === 'tipping'
         }
         hideControls
         precision={0}
@@ -197,7 +275,7 @@ const AdjustCredits = ({ gameId, updateValues }) => {
         <Button
           color={'teal'}
           onClick={(e) => postChips(e)}
-          disabled={depositStatus === 'teal' || depositStatus === 'buying'}
+          disabled={depositStatus === 'buying'}
         >
           {inputValue && depositStatus === 'unapproved'
             ? 'Approve'
@@ -214,31 +292,22 @@ const AdjustCredits = ({ gameId, updateValues }) => {
           onClick={(e) => withdrawChips(e)}
           disabled={withdrawStatus === 'withdrawing'}
         >
-          {withdrawChips === 'withdrawing' ? 'Completing Txn...' : 'Withdraw'}
+          {withdrawStatus === 'withdrawing' ? 'Completing Txn...' : 'Withdraw'}
+        </Button>
+        <Button
+          color='grape'
+          onClick={(e) => tipChips(e)}
+          disabled={tipStatus === 'tipping'}
+        >
+          {tipStatus === 'tipping' ? 'Completing Txn...' : 'Tip Game'}
         </Button>
       </Group>
       <div>
         {(withdrawStatus === 'success' || depositStatus === 'success') && (
-          <div style={{ color: 'green' }}>Your transaction was successful!</div>
+          <Text color='green'>Your transaction was successful!</Text>
         )}
       </div>
     </>
   )
 }
-
-const Input = styled.input`
-  font-size: 1rem;
-  margin-top: 1rem;
-  max-width: 150px;
-  @media (min-width: 576px) {
-    max-width: 275px;
-  }
-  @media (min-width: 768px) {
-    max-width: 375px;
-  }
-  @media (min-width: 992px) {
-    font-size: 1.5rem;
-  }
-`
-
 export default AdjustCredits

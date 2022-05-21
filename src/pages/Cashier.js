@@ -1,28 +1,11 @@
-import React, { useEffect } from 'react'
-import styled from 'styled-components'
+import React from 'react'
 import BuyForm from '../components/BuyForm'
 import SellForm from '../components/SellForm'
 import { useChainState } from '../hooks/useChainState'
-import { useHistory } from 'react-router-dom'
-import { zeroAddress, zeroUserAddress } from '../constants'
 import { Grid, Stack, Title, Paper } from '@mantine/core'
 
 const Cashier = () => {
   const chainState = useChainState()
-  const history = useHistory()
-  console.log(chainState)
-
-  useEffect(() => {
-    if (
-      chainState.account?.data?.address &&
-      chainState.account.data.address !== zeroAddress &&
-      (!chainState.userName?.data ||
-        chainState.userName.data === zeroUserAddress) &&
-      chainState.userName?.isFetched
-    ) {
-      history.push('/createAccount')
-    }
-  }, [chainState.userName, chainState.account])
 
   return (
     <Grid justify='center' align='center' style={{ height: 800 }}>

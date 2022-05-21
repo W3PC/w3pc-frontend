@@ -4,6 +4,7 @@ import { useChainState } from '../hooks/useChainState'
 import { zeroUserAddress } from '../constants'
 import { utils } from 'ethers'
 import { Button, TextInput, Container } from '@mantine/core'
+import CreateAccount from './CreateAccount'
 
 const JoinGame = () => {
   const [gameId, setGameId] = useState('')
@@ -11,6 +12,13 @@ const JoinGame = () => {
   const [gameLoaded, setGameLoaded] = useState(false)
   const { userName } = useChainState()
   const [errors, setErrors] = useState('')
+
+  if (
+    (!userName?.data || userName?.data === zeroUserAddress) &&
+    userName?.isFetched
+  ) {
+    return <CreateAccount />
+  }
 
   const handleClick = (e) => {
     e.preventDefault()

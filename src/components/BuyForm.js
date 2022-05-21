@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
 import { erc20ABI, useContractWrite, useProvider } from 'wagmi'
 import { BigNumber, constants } from 'ethers'
 import cashierAbi from '../constants/abis/Cashier.json'
@@ -22,7 +21,7 @@ const BuyForm = ({ userUsdc, update, allowance }) => {
         setStatus('approved')
       }
     }
-  }, [allowance?.data, value])
+  }, [allowance?.data, value, status])
 
   const approveUsdc = useContractWrite(
     {

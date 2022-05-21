@@ -11,6 +11,7 @@ const WagmiProvider = (props) => {
   const avalancheChain = {
     blockExplorers: {
       default: { name: 'SnowTrace', url: 'https://snowtrace.io/' },
+      // eslint-disable-next-line
       default: { name: 'SnowTrace', url: 'https://snowtrace.io/' },
     },
     id: 43114,
