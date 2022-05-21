@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
-import styled from 'styled-components'
 import { useContractWrite, useProvider } from 'wagmi'
-import { BigNumber } from 'ethers'
 import cashierAbi from '../constants/abis/Cashier.json'
 import { cashierAddress } from '../constants'
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'

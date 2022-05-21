@@ -1,10 +1,8 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit'
-import styled from 'styled-components'
 import { Button, Text } from '@mantine/core'
 import { useChainState } from '../hooks/useChainState'
 import { utils } from 'ethers'
 import { zeroAddress } from '../constants'
-import ClipLoader from 'react-spinners/ClipLoader'
 
 export const RainbowConnect = () => {
   const { userName, userChips, userUsdc } = useChainState()
@@ -70,35 +68,4 @@ export const RainbowConnect = () => {
     </ConnectButton.Custom>
   )
 }
-
-const AccountInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  color: white;
-  font-size: 0.8rem;
-
-  &:hover {
-    background-color: #64748b;
-    cursor: pointer;
-  }
-
-  @media (min-width: 576px) {
-    font-size: 1rem;
-  }
-  @media (min-width: 768px) {
-    font-size: 1rem;
-  }
-  @media (min-width: 992px) {
-    font-size: 1rem;
-  }
-  @media (min-width: 1200px) {
-    font-size: 1.5rem;
-  }
-`
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`
-
 export default RainbowConnect

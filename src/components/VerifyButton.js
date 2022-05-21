@@ -3,7 +3,7 @@ import { Button } from '@mantine/core'
 import { useSigner } from 'wagmi'
 import { Tooltip } from '@mantine/core'
 
-const VerifyButton = ({}) => {
+const VerifyButton = () => {
   const [signed, setSigned] = useState('')
   const [isCopied, setIsCopied] = useState(false)
   const signer = useSigner()

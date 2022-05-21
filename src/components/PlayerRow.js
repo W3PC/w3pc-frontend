@@ -1,19 +1,10 @@
 import React, { useState } from 'react'
-import styled, { css } from 'styled-components'
 import { useContractWrite, useContractRead } from 'wagmi'
 import gameAbi from '../constants/abis/Game.json'
 import { utils, BigNumber } from 'ethers'
 import { addCreditsErr, deductCreditsErr } from '../constants'
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
-import {
-  NumberInput,
-  Stack,
-  Slider,
-  Group,
-  Text,
-  Accordion,
-  Button,
-} from '@mantine/core'
+import { NumberInput, Stack, Slider, Text, Button } from '@mantine/core'
 
 const PlayerRow = ({ id, gameAddress, totalGameCredits, totalGameChips }) => {
   const [inputValue, setInputValue] = useState(0)
@@ -143,7 +134,7 @@ const PlayerRow = ({ id, gameAddress, totalGameCredits, totalGameChips }) => {
           // check for the previous hour timestamp incase they got the code towards the end of an hour
           const previousHour = rounded - 3600
           const newSignersAddress = utils.verifyMessage(
-            `Hey I am who I say I am-${rounded}`,
+            `Hey I am who I say I am-${previousHour}`,
             signedMsg
           )
           if (newSignersAddress === utils.getAddress(id)) {

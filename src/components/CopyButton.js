@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import styled from 'styled-components'
 import { Button } from '@mantine/core'
 
 const CopyButton = ({ text }) => {

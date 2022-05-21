@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import styled from 'styled-components'
 import { useQuery } from 'urql'
 import { useContractRead } from 'wagmi'
 import { useChainState } from '../hooks/useChainState'
@@ -8,7 +7,7 @@ import gameAbi from '../constants/abis/Game.json'
 import CopyButton from './CopyButton'
 import AdjustCredits from './AdjustCredits'
 import VerifyButton from './VerifyButton'
-import { Grid, Title, Text, Stack, Paper } from '@mantine/core'
+import { Grid, Title, Stack } from '@mantine/core'
 
 const GameView = ({ gameId, setGameLoaded }) => {
   const { account } = useChainState()
